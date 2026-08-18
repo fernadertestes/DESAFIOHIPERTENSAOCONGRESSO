@@ -1,23 +1,42 @@
-# Versão Congresso — agosto de 2026
+# Versão Congresso — 1.1.0 — agosto de 2026
 
-Esta versão reúne a revisão científica e a limpeza técnica realizada antes da apresentação.
+Documento corrente da versão preparada para demonstração acadêmica. Relatórios anteriores em `docs/` permanecem como histórico e não substituem este estado.
 
-## Alterações técnicas
+## Estado verificado
 
-- README refeito com objetivo, módulos, nota metodológica, referências e instruções de execução.
-- Nome e metadados da página padronizados para **Desafio Hipertensão**.
-- Referências científicas e nota metodológica acessíveis na tela inicial do jogo.
-- Imagens PNG convertidas para WebP.
-- Vídeo de vitória recomprimido para web.
-- Documentação científica organizada em `docs/`.
-- `.gitignore` ampliado para evitar arquivos locais e artefatos de build no repositório.
+- build de produção concluído com Vite 8;
+- onze testes automatizados aprovados;
+- `npm audit` sem vulnerabilidades conhecidas na árvore instalada;
+- Three.js carregado sob demanda, fora do pacote inicial;
+- relatório A4 em preto e branco, com folha timbrada e aviso educacional em todas as páginas;
+- contraste, foco, progresso semântico, seleção acessível e redução de movimento revisados;
+- fallback estático para ausência de WebGL e tratamento global de erro;
+- pontuação do Módulo 3 integrada com denominador real e teste de regressão;
+- CI configurada para testar, compilar e auditar cada push e pull request.
 
-## Otimização de mídia
+## Lighthouse de produção
 
-As oito imagens principais ocupavam aproximadamente 9,9 MB em PNG. Em WebP, passaram a ocupar cerca de 0,33 MB.
-O vídeo de vitória passou de aproximadamente 4,7 MB para 0,69 MB.
-A pasta `public/` desta versão ocupa aproximadamente 1,0 MB.
+Medição local em Chrome headless, viewport móvel, em 18/08/2026:
 
-## Validação
+- desempenho: 99/100;
+- acessibilidade: 100/100;
+- boas práticas: 100/100;
+- SEO: 100/100;
+- FCP: 1,4 s; LCP: 2,0 s; TBT: 0 ms; CLS: 0;
+- nenhum erro de console.
 
-As referências internas de mídia foram atualizadas para os novos arquivos. O build não pôde ser executado neste ambiente porque a instalação local das dependências Node não foi concluída. Antes da publicação final, execute `npm install` e `npm run build` em uma máquina com Node.js 18+.
+Resultados automatizados não substituem teste manual com teclado, VoiceOver/NVDA e adolescentes reais.
+
+## Delimitação acadêmica
+
+O produto é um **protótipo digital educacional gamificado baseado em diretrizes selecionadas**. Não é instrumento validado, não demonstra eficácia por si só, não mede risco clínico e não substitui aferição ou avaliação profissional.
+
+O índice do jogo é uma média simples das quatro atividades de conhecimento e decisão. Radar de hábitos, história familiar e compromissos são apresentados separadamente para não converter contexto pessoal em desempenho.
+
+## Documentos normativos desta versão
+
+- `VERSAO_ATUAL.md`: escopo e limitações correntes;
+- `MATRIZ_EVIDENCIAS.md`: rastreabilidade científica por domínio e banco de itens;
+- `VALIDACAO_METODOLOGICA.md`: protocolo necessário antes de alegar validade ou eficácia;
+- `PRIVACIDADE_ETICA.md`: salvaguardas para público adolescente;
+- `REFERENCIAS_CIENTIFICAS.md`: referências comentadas.

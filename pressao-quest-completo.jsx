@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import * as THREE from 'three';
+import { Component, useState, useEffect, useRef } from "react";
 import {
   MODULE_MAX_POINTS,
   calculateActionScore,
@@ -11,6 +10,7 @@ import {
   calculateLearningScore,
   calculatePreventionPerformance,
   calculateScenarioProgress,
+  createPreventionSubmission,
   toPercent,
 } from "./src/scoring.js";
 
@@ -19,10 +19,12 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════════
 const C = {
   bg:"#07090f",surface:"#0d1320",card:"#111827",border:"#1a2540",borderHi:"#2a3a5a",
-  red:"#e51b3f",redL:"#ff4d6d",orange:"#ff8c42",yellow:"#ffd166",
+  red:"#ff4d6d",redL:"#ff7590",orange:"#ff9d5c",yellow:"#ffd166",
   green:"#00f5a0",teal:"#00c9ff",purple:"#a855f7",amber:"#f59e0b",
-  navy:"#3b82f6",white:"#f0f4ff",gray:"#64748b",grayDk:"#334155",grayLt:"#94a3b8",
+  navy:"#60a5fa",white:"#f0f4ff",gray:"#a7b3c6",grayDk:"#8d9bb0",grayLt:"#cbd5e1",
 };
+
+const APP_VERSION = "1.1.0";
 
 const MODULE_ART = {
   1: "/modules/m1-quiz-risco.webp",
@@ -40,7 +42,8 @@ const MEDIA = {
 };
 
 function ModuleArt({ mod, size = 120, color, style }) {
-  const src = MODULE_ART[mod];
+  const original = MODULE_ART[mod];
+  const src = size <= 96 ? original?.replace("/modules/","/modules/thumbs/").replace(".webp",".jpg") : original;
   if (!src) return null;
   return (
     <img
@@ -48,6 +51,8 @@ function ModuleArt({ mod, size = 120, color, style }) {
       alt=""
       width={size}
       height={size}
+      loading={size<=96?"lazy":"eager"}
+      decoding="async"
       draggable={false}
       style={{
         width: size,
@@ -92,24 +97,88 @@ const GLOBAL_CSS = `
   @keyframes celebPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
   @keyframes textReveal{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
   button{transition:all .18s cubic-bezier(.4,0,.2,1);cursor:pointer}
+  button,input,textarea{min-height:44px}
   button:active{transform:scale(.97)!important}
-  button:focus-visible,input:focus-visible{outline:3px solid ${C.teal};outline-offset:3px}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid ${C.teal};outline-offset:3px}
   input,textarea{transition:border-color .2s}
+  .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+  .skip-link{position:fixed;left:12px;top:12px;z-index:10000;padding:10px 14px;background:#fff;color:#000;border-radius:8px;transform:translateY(-180%)}
+  .skip-link:focus{transform:translateY(0)}
   ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:${C.borderHi};border-radius:99px}
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
     canvas{display:none!important}
+    .motion-video{display:none!important}
   }
   @media (max-width:360px){
     button{letter-spacing:0!important}
   }
+  .print-letterhead,.print-page-footer{display:none}
   @media print{
+    @page{size:A4 portrait;margin:13mm 13mm 16mm}
+    html,body,#root{width:100%!important;min-width:0!important;background:#fff!important;color:#000!important}
+    body{font-family:"Palatino Linotype","Book Antiqua",Palatino,serif!important;font-size:9pt;line-height:1.38}
     .no-print{display:none!important}
     canvas{display:none!important}
     body *{visibility:hidden}
     [data-report],[data-report] *{visibility:visible}
-    [data-report]{position:absolute;top:0;left:0;width:100%;background:#07090f!important;-webkit-print-color-adjust:exact;color-adjust:exact}
+    [data-report]{
+      position:static!important;top:auto!important;left:auto!important;width:100%!important;
+      padding:0!important;gap:0!important;animation:none!important;background:#fff!important;color:#000!important;
+      -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;
+    }
+    [data-report]::before{
+      content:"DESAFIO HIPERTENSÃO";position:fixed;left:50%;top:52%;z-index:-1;
+      transform:translate(-50%,-50%) rotate(-35deg);font:700 34pt/1 Georgia,serif;
+      letter-spacing:4pt;white-space:nowrap;color:#f0f0f0!important;
+    }
+    [data-report],[data-report] *{
+      color:#000!important;background-color:transparent!important;background-image:none!important;
+      box-shadow:none!important;text-shadow:none!important;filter:grayscale(1)!important;
+    }
+    [data-report] p{orphans:3;widows:3}
+    [data-report] > div:not(.print-letterhead):not(.no-print){
+      margin:0 0 4.5mm!important;padding:3.5mm!important;border:1px solid #b7b7b7!important;
+      border-radius:0!important;break-inside:avoid;page-break-inside:avoid;
+    }
+    [data-report] > div[style*="display: grid"],
+    [data-report] > div[style*="display:grid"]{border:0!important;padding:0!important}
+    [data-report] [style*="border-radius"]{border-radius:0!important}
+    [data-report] [style*="border-left"]{border-left:2px solid #222!important}
+    [data-report] [style*="font-family"]{font-family:Georgia,"Times New Roman",serif!important;letter-spacing:.7pt!important}
+    [data-report] .screen-report-header{display:none!important}
+    [data-report] .print-letterhead{
+      display:grid!important;grid-template-columns:17mm 1fr auto;align-items:center;gap:4mm;
+      margin:0 0 6mm!important;padding:0 0 4mm!important;border:0!important;border-bottom:2px solid #111!important;
+      break-inside:avoid;page-break-inside:avoid;
+    }
+    .print-letterhead__mark{
+      display:flex!important;align-items:center;justify-content:center;width:17mm;height:17mm;
+      border:1.5px solid #111!important;border-radius:50%!important;
+    }
+    .print-letterhead__mark svg{width:12mm;height:12mm;stroke:#000!important;fill:none!important;filter:none!important}
+    .print-letterhead__brand{font:700 16pt/1 Georgia,"Times New Roman",serif!important;letter-spacing:1.8pt!important}
+    .print-letterhead__subtitle{margin-top:1.5mm;font:600 7.5pt/1.2 Arial,sans-serif!important;letter-spacing:1.6pt!important;text-transform:uppercase}
+    .print-letterhead__meta{text-align:right;font:400 7.5pt/1.45 Arial,sans-serif!important;color:#333!important}
+    .print-letterhead__title{grid-column:1/-1;padding-top:4mm;border-top:1px solid #aaa!important}
+    .print-letterhead__title h1{margin:0 0 1mm;font:700 16pt/1.1 Georgia,"Times New Roman",serif!important;letter-spacing:.3pt!important}
+    .print-letterhead__title p{margin:0;font:700 8pt/1.3 Arial,sans-serif!important;letter-spacing:1.3pt!important;text-transform:uppercase}
+    [data-report] .report-progress{height:5px!important;background:#fff!important;border:1px solid #222!important}
+    [data-report] .report-progress__fill{background:#222!important;background-image:none!important}
+    [data-report] .report-progress__marker{display:none!important}
+    [data-report] .report-card{break-inside:avoid;page-break-inside:avoid}
+    [data-report] .report-footer{border-top:2px solid #111!important;border-right:0!important;border-bottom:0!important;border-left:0!important;padding-top:4mm!important}
+    [data-report] .report-footer::after{
+      content:"DESAFIO HIPERTENSÃO · EDUCAÇÃO EM SAÚDE";display:block;margin-top:3mm;
+      font:700 7pt/1 Arial,sans-serif!important;letter-spacing:1.4pt!important;
+    }
+    .print-page-footer{
+      display:block!important;position:fixed;left:0;right:0;bottom:-11mm;padding-top:2mm;
+      border-top:1px solid #777!important;text-align:center;font:700 6.5pt/1.2 Arial,sans-serif!important;
+      letter-spacing:.5pt!important;background:#fff!important;color:#000!important;
+    }
+    .print-page-footer::after{content:" · página " counter(page)}
   }
 `;
 
@@ -117,7 +186,7 @@ const GLOBAL_CSS = `
 // MÓDULO 1 — QUIZ DE RISCO PESSOAL
 // ═══════════════════════════════════════════════════════════════════════════════
 // Banco completo — 60 perguntas. A cada jogo, 10 são sorteadas.
-const QUIZ_QUESTIONS_BANK = [
+export const QUIZ_QUESTIONS_BANK = [
   // ── Alimentação ──────────────────────────────────────────────────────────
   {id:1,cat:"🍔 Alimentação",q:"Com que frequência você come ultraprocessados?",sub:"(salgadinhos, fast food, macarrão instantâneo)",
    opts:[{t:"Raramente ou nunca",pts:0,risk:0},{t:"1–2x por semana",pts:10,risk:5},{t:"Quase todo dia",pts:20,risk:15},{t:"Todo dia, várias vezes",pts:30,risk:25}]},
@@ -157,8 +226,8 @@ const QUIZ_QUESTIONS_BANK = [
   {id:20,cat:"😤 Estresse",q:"Você tem conflitos frequentes com amigos, família ou no relacionamento?",sub:"Conflitos relacionais são fonte de estresse crônico",
    opts:[{t:"Relacionamentos tranquilos em geral",pts:0,risk:0},{t:"Alguns conflitos, mas resolvo",pts:8,risk:5},{t:"Conflitos frequentes me afetam bastante",pts:20,risk:13},{t:"Ambiente muito difícil no dia a dia",pts:30,risk:22}]},
   // ── Peso ──────────────────────────────────────────────────────────────────
-  {id:7,cat:"⚖️ Peso",q:"Como está seu peso corporal?",sub:"Excesso de peso está associado a maior risco de pressão alta em adolescentes",
-   opts:[{t:"Peso adequado",pts:0,risk:0},{t:"Levemente acima do ideal",pts:10,risk:8},{t:"Sobrepeso (médico comentou)",pts:22,risk:18},{t:"Obesidade diagnosticada",pts:35,risk:30}]},
+  {id:7,cat:"⚖️ Peso",q:"Algum profissional de saúde já conversou com você sobre acompanhar seu crescimento ou peso?",sub:"Em adolescentes, essa avaliação usa idade, sexo, curva de crescimento e contexto clínico — aparência não fecha diagnóstico",
+   opts:[{t:"Não, ou disseram que está tudo bem",pts:0,risk:0},{t:"Não sei / prefiro não responder",pts:0,risk:0},{t:"Sim, recomendaram acompanhamento",pts:12,risk:8},{t:"Sim, já faço acompanhamento",pts:0,risk:0}]},
   {id:21,cat:"⚖️ Peso",q:"Você já deixou de participar de atividades físicas por causa do seu peso?",sub:"Vergonha do corpo pode afastar a pessoa do movimento; acolhimento e atividade prazerosa ajudam",
    opts:[{t:"Não, participo normalmente",pts:0,risk:0},{t:"Às vezes me sinto desconfortável mas vou",pts:8,risk:4},{t:"Frequentemente evito por causa disso",pts:20,risk:14},{t:"Sempre evito por causa do peso",pts:30,risk:22}]},
   // ── Família ───────────────────────────────────────────────────────────────
@@ -302,12 +371,12 @@ const FAM_FACTORS=[
   {id:"kidneyDisease",label:"Doença renal",icon:"🫘"},
 ];
 const FAM_DEFS=[
-  {id:"father",label:"Pai",icon:"👨",side:"direto"},
-  {id:"mother",label:"Mãe",icon:"👩",side:"direto"},
-  {id:"grandpa",label:"Avô",icon:"👴",side:"paterno"},
-  {id:"grandma",label:"Avó",icon:"👵",side:"materno"},
-  {id:"brother",label:"Irmão",icon:"👦",side:"direto"},
-  {id:"sister",label:"Irmã",icon:"👧",side:"direto"},
+  {id:"father",label:"Responsável ou figura parental 1",icon:"🧑",side:"direto"},
+  {id:"mother",label:"Responsável ou figura parental 2",icon:"🧑",side:"direto"},
+  {id:"grandpa",label:"Familiar mais velho 1",icon:"🧓",side:"paterno"},
+  {id:"grandma",label:"Familiar mais velho 2",icon:"🧓",side:"materno"},
+  {id:"brother",label:"Irmão, irmã ou familiar próximo 1",icon:"🧑",side:"direto"},
+  {id:"sister",label:"Irmão, irmã ou familiar próximo 2",icon:"🧑",side:"direto"},
 ];
 function classifyMember(factors){
   const count=(factors||[]).length;
@@ -330,7 +399,7 @@ function calcExplorerScore(members){return calculateFamilyExplorerScore(members)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Desafios com perguntas abertas e palavras-chave aceitas
-const PREVENTION_CHALLENGES = [
+export const PREVENTION_CHALLENGES = [
   {
     id: 1,
     type: "open",
@@ -447,7 +516,7 @@ const PREVENTION_CHALLENGES = [
     points: 20,
     bonusKeywords: ["instagram","tiktok","redes sociais","escola","conscientizar","campanha","prevenção"],
     bonusPoints: 10,
-    tip: "💡 Conteúdo educativo nas redes sociais é uma das formas mais eficazes de prevenção em saúde para adolescentes!",
+    tip: "💡 Redes sociais podem ajudar a compartilhar educação em saúde quando o conteúdo é confiável, claro e não substitui orientação profissional.",
     perfect: "🏆 Boa! Informação certa também vira cuidado quando circula.",
   },
   {
@@ -532,7 +601,7 @@ const PREVENTION_CHALLENGES = [
     points: 25,
     bonusKeywords: ["psicólogo","conversar","ansiedade","apoio","respiração"],
     bonusPoints: 10,
-    tip: "💡 Estresse crônico eleva cortisol e pode manter a pressão mais alta.",
+    tip: "💡 Estresse persistente pode afetar temporariamente a pressão, o sono e outros hábitos; apoio de alguém de confiança ou profissional pode ajudar.",
     perfect: "🏆 Aí sim! Cabeça e corpo entram no mesmo time.",
   },
   {
@@ -580,11 +649,11 @@ function pickPreventionChallenges(){
 // Aliados especiais — cartas desbloqueáveis
 const ALLIES = [
   {id:"medic",name:"Dr. Coração",icon:"👨‍⚕️",color:C.teal,power:"Ajuda a interpretar o histórico da família",unlockWords:["médico","cardiologista","pediatra","clínico"],desc:"O profissional de saúde confirma medidas, investiga quando necessário e orienta o cuidado."},
-  {id:"nutri",name:"Nutricionista",icon:"🥗",color:C.green,power:"Bônus +15 pts na alimentação",unlockWords:["nutricionista","dieta","alimentação","DASH","nutrição"],desc:"Pode ajudar a adaptar a alimentação à rotina, preferências e necessidades de cada pessoa."},
-  {id:"prof",name:"Prof. Educação Física",icon:"🏋️",color:C.orange,power:"Bônus +15 pts no exercício",unlockWords:["educador físico","personal","professor","academia","treino","esporte"],desc:"Pode ajudar a planejar atividade física com progressão, técnica e segurança."},
-  {id:"psico",name:"Psicólogo",icon:"🧠",color:C.purple,power:"Reduz pontuação de estresse",unlockWords:["psicólogo","terapia","saúde mental","ansiedade","mindfulness","meditação"],desc:"Pode ajudar a reconhecer fontes de estresse e construir estratégias saudáveis para lidar com elas."},
-  {id:"family",name:"Família Saudável",icon:"👨‍👩‍👧",color:C.amber,power:"Bônus +20 pts no total",unlockWords:["família","pais","mãe","pai","apoio","casa","lar"],desc:"Apoio da família pode facilitar mudanças de rotina e cuidados compartilhados."},
-  {id:"school",name:"Escola Aliada",icon:"🏫",color:C.navy,power:"Multiplica pontos ×1.5",unlockWords:["escola","professor","aula","educação","UBS","posto","comunidade"],desc:"A escola pode ser um espaço de educação em saúde, conversa e construção de hábitos."},
+  {id:"nutri",name:"Nutricionista",icon:"🥗",color:C.green,power:"Aliado para escolhas alimentares",unlockWords:["nutricionista","dieta","alimentação","DASH","nutrição"],desc:"Pode ajudar a adaptar a alimentação à rotina, preferências e necessidades de cada pessoa."},
+  {id:"prof",name:"Prof. Educação Física",icon:"🏋️",color:C.orange,power:"Aliado para movimento seguro",unlockWords:["educador físico","personal","professor","academia","treino","esporte"],desc:"Pode ajudar a planejar atividade física com progressão, técnica e segurança."},
+  {id:"psico",name:"Psicólogo",icon:"🧠",color:C.purple,power:"Aliado para saúde mental",unlockWords:["psicólogo","terapia","saúde mental","ansiedade","mindfulness","meditação"],desc:"Pode ajudar a reconhecer fontes de estresse e construir estratégias saudáveis para lidar com elas."},
+  {id:"family",name:"Rede de apoio",icon:"🤝",color:C.amber,power:"Aliada para mudanças compartilhadas",unlockWords:["família","pais","mãe","pai","apoio","casa","lar"],desc:"Uma rede de apoio pode facilitar mudanças de rotina e cuidados compartilhados."},
+  {id:"school",name:"Escola Aliada",icon:"🏫",color:C.navy,power:"Aliada para educação em saúde",unlockWords:["escola","professor","aula","educação","UBS","posto","comunidade"],desc:"A escola pode ser um espaço de educação em saúde, conversa e construção de hábitos."},
 ];
 
 // Verifica keywords no texto (normalizado)
@@ -610,7 +679,7 @@ function checkAllies(text) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTES COMPARTILHADOS
 // ═══════════════════════════════════════════════════════════════════════════════
-function Btn({children,onClick,color=C.teal,outline,disabled,style={},size="md"}){
+function Btn({children,onClick,color=C.teal,outline,disabled,style={},size="md",...buttonProps}){
   const p=size==="sm"?"6px 12px":size==="lg"?"16px 24px":"10px 18px";
   const f=size==="sm"?12:size==="lg"?17:14;
   const handleClick=(e)=>{
@@ -625,7 +694,7 @@ function Btn({children,onClick,color=C.teal,outline,disabled,style={},size="md"}
     setTimeout(()=>ripple.remove(),560);
     onClick&&onClick(e);
   };
-  return <button onClick={handleClick} disabled={disabled} style={{padding:p,fontSize:f,fontWeight:800,letterSpacing:.5,background:outline?"transparent":color,color:outline?color:"#000",border:`2px solid ${color}`,borderRadius:11,opacity:disabled?.45:1,boxShadow:!outline?`0 0 16px ${color}44`:"none",position:"relative",overflow:"hidden",...style}}
+  return <button {...buttonProps} onClick={handleClick} disabled={disabled} style={{minHeight:44,padding:p,fontSize:f,fontWeight:800,letterSpacing:.5,background:outline?"transparent":color,color:outline?color:"#000",border:`2px solid ${color}`,borderRadius:11,opacity:disabled?.45:1,boxShadow:!outline?`0 0 16px ${color}44`:"none",position:"relative",overflow:"hidden",...style}}
     onMouseEnter={e=>{if(!disabled){e.currentTarget.style.transform="scale(1.04)";e.currentTarget.style.boxShadow=`0 0 28px ${color}77`;}}}
     onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.boxShadow=!outline?`0 0 16px ${color}44`:"none";}}
   >{children}</button>;
@@ -635,21 +704,64 @@ function Tag({label,color}){return <span style={{background:`${color}22`,color,b
 
 function RiskBadge({color,label}){return <div style={{background:`${color}22`,border:`2px solid ${color}`,borderRadius:8,padding:"3px 10px",color,fontSize:12,fontWeight:900,boxShadow:`0 0 10px ${color}44`,whiteSpace:"nowrap"}}>{label}</div>;}
 
-function ProgressBar({value,max=100,color,h=6}){
-  const pct=Math.min(100,(value/max)*100);
-  return <div style={{width:"100%",height:h,background:C.border,borderRadius:99,overflow:"hidden",position:"relative",boxShadow:`inset 0 0 0 1px ${color}22`}}>
-    <div style={{width:`${pct}%`,height:"100%",backgroundImage:`linear-gradient(90deg,${color}99,${color},#fff,${color})`,backgroundSize:"220% 100%",borderRadius:99,transition:"width .7s cubic-bezier(.4,0,.2,1)",boxShadow:`0 0 14px ${color}cc`,animation:"shimmer 1.5s linear infinite"}}/>
-    {pct>0&&<div style={{position:"absolute",left:`calc(${pct}% - 7px)`,top:"50%",width:14,height:14,borderRadius:"50%",background:color,transform:"translateY(-50%)",boxShadow:`0 0 18px ${color}`,animation:"auraPulse 1.2s ease infinite"}}/>}
+function ProgressBar({value,max=100,color,h=6,label="Progresso"}){
+  const pct=max>0?Math.max(0,Math.min(100,(value/max)*100)):0;
+  return <div className="report-progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={Math.min(max,Math.max(0,value))} style={{width:"100%",height:h,background:C.border,borderRadius:99,overflow:"hidden",position:"relative",boxShadow:`inset 0 0 0 1px ${color}22`}}>
+    <div className="report-progress__fill" style={{width:`${pct}%`,height:"100%",backgroundImage:`linear-gradient(90deg,${color}99,${color},#fff,${color})`,backgroundSize:"220% 100%",borderRadius:99,transition:"width .7s cubic-bezier(.4,0,.2,1)",boxShadow:`0 0 14px ${color}cc`,animation:"shimmer 1.5s linear infinite"}}/>
+    {pct>0&&<div className="report-progress__marker" style={{position:"absolute",left:`calc(${pct}% - 7px)`,top:"50%",width:14,height:14,borderRadius:"50%",background:color,transform:"translateY(-50%)",boxShadow:`0 0 18px ${color}`,animation:"auraPulse 1.2s ease infinite"}}/>}
   </div>;
 }
 
 function SoundToggle({on, onToggle}){
   return(
-    <button onClick={onToggle} title={on?"Desligar som":"Ligar som"}
+    <button onClick={onToggle} title={on?"Desligar som":"Ligar som"} aria-label={on?"Desligar som":"Ligar som"} aria-pressed={on}
       style={{position:"fixed",right:14,bottom:14,zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",width:44,height:44,borderRadius:12,background:on?`${C.teal}22`:C.surface,border:`1px solid ${on?C.teal:C.borderHi}`,color:on?C.teal:C.gray,boxShadow:on?`0 0 20px ${C.teal}44`:"none",fontSize:19}}>
       {on?"🔊":"🔇"}
     </button>
   );
+}
+
+function usePrefersReducedMotion(){
+  const [reduced,setReduced]=useState(()=>typeof window!=="undefined"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(()=>{
+    const media=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update=()=>setReduced(media.matches);
+    media.addEventListener?.("change",update);
+    return()=>media.removeEventListener?.("change",update);
+  },[]);
+  return reduced;
+}
+
+function useAccessibleDialog(open,onClose){
+  const dialogRef=useRef(null);
+  const closeRef=useRef(onClose);
+  closeRef.current=onClose;
+  useEffect(()=>{
+    if(!open)return;
+    const previous=document.activeElement;
+    const dialog=dialogRef.current;
+    const focusable=()=>[...(dialog?.querySelectorAll('button:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')||[])];
+    const timer=setTimeout(()=>focusable()[0]?.focus(),0);
+    const onKeyDown=(event)=>{
+      if(event.key==="Escape"){event.preventDefault();closeRef.current?.();return;}
+      if(event.key!=="Tab")return;
+      const items=focusable();
+      if(!items.length)return;
+      const first=items[0],last=items[items.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    };
+    document.addEventListener("keydown",onKeyDown);
+    return()=>{clearTimeout(timer);document.removeEventListener("keydown",onKeyDown);previous?.focus?.();};
+  },[open]);
+  return dialogRef;
+}
+
+function MotionMedia({video,poster,style}){
+  const reduced=usePrefersReducedMotion();
+  return reduced
+    ? <img src={poster} alt="" aria-hidden="true" style={style}/>
+    : <video className="motion-video" src={video} poster={poster} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1} style={style}/>;
 }
 
 function ModuleAura({color,label}){
@@ -694,7 +806,7 @@ function TopBar({module,score,onBack}){
   const artMod = MODULE_ART[module] ? Number(module) : null;
   return(
     <div style={{position:"sticky",top:0,zIndex:200,background:`${C.bg}ee`,backdropFilter:"blur(20px)",borderBottom:`1px solid ${C.border}`,padding:"11px 14px",display:"flex",alignItems:"center",gap:10}}>
-      {onBack&&<button onClick={onBack} style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",color:C.gray,fontSize:12}}>←</button>}
+      {onBack&&<button onClick={onBack} aria-label="Voltar" style={{background:"transparent",border:`1px solid ${C.border}`,borderRadius:8,padding:"4px 10px",color:C.gray,fontSize:12}}>←</button>}
       {artMod
         ? <ModuleArt mod={artMod} size={28} color={col} style={{borderRadius:8,flexShrink:0}}/>
         : <span style={{fontSize:18}}>{icons[module]}</span>}
@@ -720,87 +832,87 @@ function ThreeBackground({ moduleColor }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 10;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    if (reduceMotion) return;
+    const probe=document.createElement("canvas");
+    const webglAvailable=Boolean(probe.getContext("webgl2")||probe.getContext("webgl"));
+    if(!webglAvailable)return;
+    let cancelled=false;
+    let dispose=()=>{};
+    const init=async()=>{
+      const THREE=await import("three");
+      if(cancelled)return;
+      const scene=new THREE.Scene();
+      const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,100);
+      camera.position.z=10;
+      let renderer;
+      try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false});}
+      catch(error){console.info("Fundo WebGL indisponível; usando fundo estático.",error);return;}
+      renderer.setSize(window.innerWidth,window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 
-    const COUNT = 420;
-    const positions = new Float32Array(COUNT * 3);
-    const colors = new Float32Array(COUNT * 3);
-    const velY = new Float32Array(COUNT);
-    const phases = new Float32Array(COUNT);
-    const brightnesses = new Float32Array(COUNT);
-
-    const initCol = new THREE.Color(moduleColor || '#e51b3f');
-    const currentCol = initCol.clone();
-
-    for (let i = 0; i < COUNT; i++) {
-      positions[i * 3]     = (Math.random() - 0.5) * 22;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 22;
-      positions[i * 3 + 2] = -1 + Math.random() * -9;
-      velY[i]       = 0.008 + Math.random() * 0.022;
-      phases[i]     = Math.random() * Math.PI * 2;
-      brightnesses[i] = 0.12 + Math.random() * 0.88;
-      colors[i * 3]     = initCol.r * brightnesses[i];
-      colors[i * 3 + 1] = initCol.g * brightnesses[i];
-      colors[i * 3 + 2] = initCol.b * brightnesses[i];
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
-
-    const mat = new THREE.PointsMaterial({ size: 0.18, vertexColors: true, transparent: true, opacity: 0.75, sizeAttenuation: true });
-    const pts = new THREE.Points(geo, mat);
-    scene.add(pts);
-
-    stateRef.current = { scene, camera, renderer, geo, mat, positions, colors, velY, phases, brightnesses, COUNT, currentCol };
-
-    let rafId, tick = 0;
-    const animate = () => {
-      rafId = requestAnimationFrame(animate);
-      tick++;
-      const pos = geo.attributes.position.array;
-      for (let i = 0; i < COUNT; i++) {
-        pos[i * 3 + 1] += velY[i];
-        pos[i * 3]     += Math.sin(tick * 0.012 + phases[i]) * 0.003;
-        if (pos[i * 3 + 1] > 12) {
-          pos[i * 3 + 1] = -12;
-          pos[i * 3]     = (Math.random() - 0.5) * 22;
-        }
+      const COUNT=300;
+      const positions=new Float32Array(COUNT*3);
+      const colors=new Float32Array(COUNT*3);
+      const velY=new Float32Array(COUNT);
+      const phases=new Float32Array(COUNT);
+      const brightnesses=new Float32Array(COUNT);
+      const initCol=new THREE.Color(moduleColor||C.red);
+      const currentCol=initCol.clone();
+      for(let i=0;i<COUNT;i++){
+        positions[i*3]=(Math.random()-.5)*22;
+        positions[i*3+1]=(Math.random()-.5)*22;
+        positions[i*3+2]=-1+Math.random()*-9;
+        velY[i]=.008+Math.random()*.022;
+        phases[i]=Math.random()*Math.PI*2;
+        brightnesses[i]=.12+Math.random()*.88;
+        colors[i*3]=initCol.r*brightnesses[i];
+        colors[i*3+1]=initCol.g*brightnesses[i];
+        colors[i*3+2]=initCol.b*brightnesses[i];
       }
-      geo.attributes.position.needsUpdate = true;
-      renderer.render(scene, camera);
-    };
-    if(reduceMotion)renderer.render(scene,camera);
-    else animate();
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute("position",new THREE.BufferAttribute(positions,3));
+      geo.setAttribute("color",new THREE.BufferAttribute(colors,3));
+      const mat=new THREE.PointsMaterial({size:.18,vertexColors:true,transparent:true,opacity:.75,sizeAttenuation:true});
+      scene.add(new THREE.Points(geo,mat));
+      stateRef.current={THREE,scene,camera,renderer,geo,mat,positions,colors,velY,phases,brightnesses,COUNT,currentCol};
 
-    const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      let rafId,tick=0;
+      const animate=()=>{
+        rafId=requestAnimationFrame(animate);tick++;
+        const pos=geo.attributes.position.array;
+        for(let i=0;i<COUNT;i++){
+          pos[i*3+1]+=velY[i];
+          pos[i*3]+=Math.sin(tick*.012+phases[i])*.003;
+          if(pos[i*3+1]>12){pos[i*3+1]=-12;pos[i*3]=(Math.random()-.5)*22;}
+        }
+        geo.attributes.position.needsUpdate=true;
+        renderer.render(scene,camera);
+      };
+      animate();
+      const onResize=()=>{
+        camera.aspect=window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth,window.innerHeight);
+      };
+      window.addEventListener("resize",onResize);
+      dispose=()=>{
+        cancelAnimationFrame(rafId);
+        window.removeEventListener("resize",onResize);
+        stateRef.current=null;
+        geo.dispose();mat.dispose();renderer.dispose();
+      };
     };
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', onResize);
-      geo.dispose();
-      mat.dispose();
-      renderer.dispose();
-    };
+    init();
+    return()=>{cancelled=true;dispose();};
   }, []);
 
   useEffect(() => {
     const s = stateRef.current;
     if (!s) return;
-    const target = new THREE.Color(moduleColor || '#e51b3f');
-    const { currentCol, colors, brightnesses, COUNT, geo } = s;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const target = new s.THREE.Color(moduleColor || C.red);
+    const { currentCol, colors, brightnesses, COUNT, geo, renderer, scene, camera } = s;
     let rafId2, frame = 0;
     const lerp = () => {
       currentCol.r += (target.r - currentCol.r) * 0.045;
@@ -812,6 +924,7 @@ function ThreeBackground({ moduleColor }) {
         colors[i * 3 + 2] = currentCol.b * brightnesses[i];
       }
       geo.attributes.color.needsUpdate = true;
+      renderer.render(scene,camera);
       if (++frame < 90) rafId2 = requestAnimationFrame(lerp);
     };
     rafId2 = requestAnimationFrame(lerp);
@@ -819,7 +932,7 @@ function ThreeBackground({ moduleColor }) {
   }, [moduleColor]);
 
   return (
-    <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }} />
+    <canvas ref={canvasRef} aria-hidden="true" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }} />
   );
 }
 
@@ -832,6 +945,10 @@ function M1Home({onStart,playerName,onDevUnlock}){
   const [showSources,setShowSources]=useState(false);
   const [devInput,setDevInput]=useState("");
   const [devErr,setDevErr]=useState(false);
+  const closeDevModal=()=>{setShowDevModal(false);setDevInput("");setDevErr(false);};
+  const closeSources=()=>setShowSources(false);
+  const devDialogRef=useAccessibleDialog(showDevModal,closeDevModal);
+  const sourcesDialogRef=useAccessibleDialog(showSources,closeSources);
   const openDevModal=()=>{setShowDevModal(true);setDevErr(false);setDevInput("");};
   const tryUnlock=()=>{
     if(devInput==="1806"){setShowDevModal(false);setDevInput("");setDevErr(false);onDevUnlock();}
@@ -856,17 +973,17 @@ function M1Home({onStart,playerName,onDevUnlock}){
         {/* Hero sobre o background — título já está na capa */}
         <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",alignItems:"center",gap:14,padding:"12vh 8px 24px",textAlign:"center"}}>
           <div style={{width:"100%",maxWidth:360,aspectRatio:"9 / 14",maxHeight:"42vh",borderRadius:20,overflow:"hidden",border:`1px solid ${C.red}44`,boxShadow:`0 0 50px ${C.red}33`,position:"relative"}}>
-            <img src={MEDIA.cover} alt="Desafio Hipertensão" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+            <img src={MEDIA.cover} alt="Desafio Hipertensão" fetchPriority="high" decoding="async" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
           </div>
           <Tag label="6 Módulos · Game educativo" color={C.red}/>
           <Btn onClick={onStart} color={C.red} size="lg" style={{width:"100%",maxWidth:320,boxShadow:`0 0 28px ${C.red}66`}}>INICIAR QUEST ▶</Btn>
         </div>
 
         {showDevModal&&(
-          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999}}>
+          <div ref={devDialogRef} role="dialog" aria-modal="true" aria-labelledby="dev-dialog-title" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999}}>
             <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:28,width:280,display:"flex",flexDirection:"column",gap:14,alignItems:"center"}}>
               <div style={{fontSize:32}}>🔧</div>
-              <div style={{fontFamily:"Impact,sans-serif",fontSize:20,letterSpacing:3,color:C.white}}>MODO DEV</div>
+              <div id="dev-dialog-title" style={{fontFamily:"Impact,sans-serif",fontSize:20,letterSpacing:3,color:C.white}}>MODO DEV</div>
               <div style={{color:C.gray,fontSize:13}}>Senha de acesso</div>
               <input
                 autoFocus
@@ -879,7 +996,7 @@ function M1Home({onStart,playerName,onDevUnlock}){
               />
               {devErr&&<div style={{color:C.red,fontSize:12}}>Senha incorreta</div>}
               <div style={{display:"flex",gap:10,width:"100%"}}>
-                <Btn onClick={()=>{setShowDevModal(false);setDevInput("");setDevErr(false);}} color={C.gray} style={{flex:1,fontSize:13}}>Cancelar</Btn>
+                <Btn onClick={closeDevModal} color={C.gray} style={{flex:1,fontSize:13}}>Cancelar</Btn>
                 <Btn onClick={tryUnlock} color={C.teal} style={{flex:1,fontSize:13}}>Entrar</Btn>
               </div>
             </div>
@@ -890,6 +1007,10 @@ function M1Home({onStart,playerName,onDevUnlock}){
           <p style={{color:C.grayLt,fontSize:14,lineHeight:1.7,margin:0}}>
             Em <strong style={{color:C.white}}>6 módulos</strong>, você toma decisões, recebe feedback e descobre como hábitos, família e prevenção se conectam à hipertensão.
           </p>
+        </div>
+        <div style={{background:`${C.teal}0d`,border:`1px solid ${C.teal}33`,borderRadius:14,padding:"12px 14px"}}>
+          <div style={{color:C.teal,fontWeight:800,fontSize:12,marginBottom:5}}>🔒 PRIVACIDADE NESTA VERSÃO</div>
+          <p style={{color:C.grayLt,fontSize:12,lineHeight:1.55,margin:0}}>As respostas ficam somente neste navegador durante a partida: não há conta, servidor ou analytics. Atualizar ou fechar a página apaga o progresso. Use apelido e informe apenas o que se sentir confortável em registrar.</p>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10}}>
           {[[1,"Módulo 1","Radar de Hábitos",C.red],[2,"Módulo 2","Família",C.amber],[3,"Módulo 3","Prevenção",C.green],[4,"Módulo 4","Sinais de Alerta",C.red],[5,"Módulo 5","Consequências",C.orange],[6,"Módulo 6","Como Ajudar",C.teal]].map(([mod,m,sub,col])=>(
@@ -905,9 +1026,9 @@ function M1Home({onStart,playerName,onDevUnlock}){
           <button onClick={()=>setShowSources(true)} style={{background:"transparent",border:0,color:C.teal,fontSize:11,fontWeight:800,textDecoration:"underline",cursor:"pointer"}}>Referências científicas e nota metodológica</button>
         </div>
         {showSources&&(
-          <div role="dialog" aria-modal="true" aria-label="Referências científicas" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.9)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
+          <div ref={sourcesDialogRef} role="dialog" aria-modal="true" aria-label="Referências científicas" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.9)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
             <div style={{width:"100%",maxWidth:420,maxHeight:"82vh",overflowY:"auto",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:20}}>
-              <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",marginBottom:14}}><strong style={{fontSize:18}}>Base científica</strong><button onClick={()=>setShowSources(false)} aria-label="Fechar" style={{background:C.surface,border:`1px solid ${C.border}`,color:C.white,borderRadius:9,padding:"6px 10px",cursor:"pointer"}}>✕</button></div>
+              <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center",marginBottom:14}}><strong style={{fontSize:18}}>Base científica</strong><button onClick={closeSources} aria-label="Fechar referências" style={{background:C.surface,border:`1px solid ${C.border}`,color:C.white,borderRadius:9,padding:"6px 10px",cursor:"pointer"}}>✕</button></div>
               <p style={{color:C.grayLt,fontSize:13,lineHeight:1.6}}>O conteúdo foi revisado para educação em saúde de adolescentes. Pontuações e índices são recursos do desafio: não são escores clínicos validados, não estimam risco individual, não fazem diagnóstico e não orientam tratamento.</p>
               <div style={{color:C.grayLt,fontSize:12,lineHeight:1.65,display:"grid",gap:10}}>
                 <div><strong style={{color:C.white}}>Hipertensão:</strong> Diretriz Brasileira de Hipertensão Arterial, 2025. Arquivos Brasileiros de Cardiologia. DOI 10.36660/abc.20250624.</div>
@@ -1042,7 +1163,7 @@ function M1Quiz({onFinish}){
         {q.opts.map((opt,i)=>{
           const isS=sel===i;const oc=[C.green,C.teal,C.yellow,C.red][i];
           return(
-            <button key={i} onClick={()=>choose(i,opt)} disabled={locked} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 15px",background:isS?`${oc}22`:C.surface,border:`2px solid ${isS?oc:C.border}`,borderRadius:13,textAlign:"left",boxShadow:isS?`0 0 18px ${oc}44`:"none",opacity:locked&&!isS?.65:1}}
+            <button key={i} onClick={()=>choose(i,opt)} aria-pressed={isS} disabled={locked} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 15px",background:isS?`${oc}22`:C.surface,border:`2px solid ${isS?oc:C.border}`,borderRadius:13,textAlign:"left",boxShadow:isS?`0 0 18px ${oc}44`:"none",opacity:locked&&!isS?.65:1}}
               onMouseEnter={e=>{if(!isS){e.currentTarget.style.border=`2px solid ${oc}55`;e.currentTarget.style.background=`${oc}0d`;}}}
               onMouseLeave={e=>{if(!isS){e.currentTarget.style.border=`2px solid ${C.border}`;e.currentTarget.style.background=C.surface;}}}>
               <div style={{width:30,height:30,borderRadius:8,flexShrink:0,background:isS?oc:`${oc}22`,border:`2px solid ${oc}`,display:"flex",alignItems:"center",justifyContent:"center",color:isS?"#000":oc,fontWeight:900,fontSize:13}}>
@@ -1130,6 +1251,9 @@ function M2Selector({members,onEdit,onFinish}){
           <div style={{color:C.gray,fontSize:13,marginTop:4}}>Selecione um familiar e registre apenas o que você souber sobre o histórico dele</div>
         </div>
       </div>
+      <div style={{background:`${C.amber}10`,border:`1px solid ${C.amber}33`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>
+        Os cartões são exemplos de vínculos. Use apenas os que fizerem sentido para sua família, responsável ou rede de cuidado. Você pode pular o que não souber ou não quiser informar.
+      </div>
       {configured>0&&(
         <div style={{background:`${C.amber}11`,border:`1px solid ${C.amber}44`,borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:22}}>✅</span>
@@ -1200,7 +1324,7 @@ function M2Detail({member,memberDef,onSave,onBack}){
         </label>
         <div style={{flex:1}}>
           <div style={{color:C.gray,fontSize:13,marginBottom:5}}>Status</div>
-          <button onClick={()=>setDeceased(d=>!d)} style={{width:"100%",padding:"9px 11px",background:deceased?`${C.red}22`:C.surface,border:`1px solid ${deceased?C.red+"66":C.borderHi}`,borderRadius:9,color:deceased?C.red:C.gray,fontWeight:700,fontSize:13}}>{deceased?"💀 Falecido":"❤️ Vivo"}</button>
+          <button onClick={()=>setDeceased(d=>!d)} aria-pressed={deceased} style={{width:"100%",padding:"9px 11px",background:deceased?`${C.red}22`:C.surface,border:`1px solid ${deceased?C.red+"66":C.borderHi}`,borderRadius:9,color:deceased?C.red:C.gray,fontWeight:700,fontSize:13}}>{deceased?"💀 Falecido":"❤️ Vivo"}</button>
         </div>
       </div>
       <div style={{background:`${risk.color}11`,border:`1px solid ${risk.color}33`,borderRadius:13,padding:"11px 14px",display:"flex",alignItems:"center",gap:12}}>
@@ -1218,7 +1342,7 @@ function M2Detail({member,memberDef,onSave,onBack}){
             {cat.ids.map(fid=>{
               const f=FAM_FACTORS.find(r=>r.id===fid);const sel=factors.includes(fid);
               return(
-                <button key={fid} onClick={()=>toggle(fid)} style={{display:"flex",alignItems:"center",gap:11,padding:"9px 13px",background:sel?`${C.redL}15`:C.surface,border:`1.5px solid ${sel?C.redL+"66":C.border}`,borderRadius:10,textAlign:"left",boxShadow:sel?`0 0 12px ${C.redL}22`:"none"}}
+                <button key={fid} onClick={()=>toggle(fid)} aria-pressed={sel} style={{display:"flex",alignItems:"center",gap:11,padding:"9px 13px",background:sel?`${C.redL}15`:C.surface,border:`1.5px solid ${sel?C.redL+"66":C.border}`,borderRadius:10,textAlign:"left",boxShadow:sel?`0 0 12px ${C.redL}22`:"none"}}
                   onMouseEnter={e=>{if(!sel)e.currentTarget.style.border=`1.5px solid ${C.borderHi}`;}}
                   onMouseLeave={e=>{if(!sel)e.currentTarget.style.border=`1.5px solid ${C.border}`;}}>
                   <span style={{fontSize:18,flexShrink:0}}>{f.icon}</span>
@@ -1262,7 +1386,7 @@ function M2Tree({members,onEdit,onFinish}){
         <div style={{flex:1}}><div style={{color:C.white,fontWeight:800,fontSize:14}}>Pontuação de Explorador</div><div style={{color:C.gray,fontSize:12}}>{added.length} de {FAM_DEFS.length} familiares mapeados</div></div>
         <div style={{fontFamily:"Impact,sans-serif",fontSize:28,color:C.yellow,filter:`drop-shadow(0 0 8px ${C.yellow})`}}>{exp}</div>
       </div>
-      {[{key:"paterno",label:"👨 Lado Paterno",color:C.navy},{key:"materno",label:"👩 Lado Materno",color:C.purple},{key:"direto",label:"👫 1º Grau",color:C.teal}].map(({key,label,color})=>sides[key].length>0&&(
+      {[{key:"paterno",label:"🧓 Referência familiar A",color:C.navy},{key:"materno",label:"🧓 Referência familiar B",color:C.purple},{key:"direto",label:"🤝 Rede próxima e responsáveis",color:C.teal}].map(({key,label,color})=>sides[key].length>0&&(
         <div key={key}>
           <div style={{color:C.grayLt,fontSize:13,fontWeight:700,marginBottom:7}}>{label}</div>
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
@@ -1527,7 +1651,7 @@ const M3_PLAN_DECKS={
       {label:"Nunca falar de sentimento",detail:"Silêncio aumenta carga",ok:false},
     ],
     reason:[
-      {label:"Estresse crônico eleva cortisol e pressão",detail:"Elo mente-coração",ok:true,bonus:true},
+      {label:"Buscar apoio para estresse persistente",detail:"Protege sono, bem-estar e rotina",ok:true,bonus:true},
       {label:"Porque saúde mental não mexe com pressão",detail:"Mexe sim",ok:false},
       {label:"Porque aguentar sozinho fortalece o coração",detail:"Isolamento não é força",ok:false},
     ],
@@ -1665,7 +1789,7 @@ function M3Challenge({challenge,onSubmit,challengeIndex,totalChallenges,unlocked
                   {deck[group.id].map(card=>{
                     const isSelected=selected[group.id]?.label===card.label;
                     return(
-                      <button key={card.label} onClick={()=>{SFX.click();setSelected(p=>({...p,[group.id]:card}));setMiss("");}}
+                      <button key={card.label} aria-pressed={isSelected} onClick={()=>{SFX.click();setSelected(p=>({...p,[group.id]:card}));setMiss("");}}
                         style={{width:"100%",display:"flex",alignItems:"flex-start",gap:10,padding:"10px 11px",background:isSelected?`${challenge.categoryColor}22`:C.card,border:`2px solid ${isSelected?challenge.categoryColor:C.border}`,borderRadius:12,textAlign:"left",boxShadow:isSelected?`0 0 14px ${challenge.categoryColor}33`:"none"}}>
                         <span style={{width:24,height:24,borderRadius:7,background:isSelected?challenge.categoryColor:`${challenge.categoryColor}18`,border:`1px solid ${challenge.categoryColor}66`,color:isSelected?"#000":challenge.categoryColor,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,flexShrink:0}}>
                           {isSelected?"✓":"+"}
@@ -1681,7 +1805,7 @@ function M3Challenge({challenge,onSubmit,challengeIndex,totalChallenges,unlocked
               </div>
             ))}
           </div>
-          {miss&&<div style={{marginTop:10,background:`${C.red}12`,border:`1px solid ${C.red}44`,borderRadius:10,padding:"8px 10px",color:C.red,fontSize:12,fontWeight:800}}>{miss}</div>}
+          {miss&&<div role="alert" style={{marginTop:10,background:`${C.red}12`,border:`1px solid ${C.red}44`,borderRadius:10,padding:"8px 10px",color:C.red,fontSize:12,fontWeight:800}}>{miss}</div>}
           <div style={{display:"flex",gap:10,marginTop:10,alignItems:"center"}}>
             <div style={{flex:1,height:4,background:C.border,borderRadius:99,overflow:"hidden"}}>
               <div style={{width:`${(Object.keys(selected).length/3)*100}%`,height:"100%",background:complete?challenge.categoryColor:C.grayDk,borderRadius:99,transition:"width .3s"}}/>
@@ -1694,7 +1818,7 @@ function M3Challenge({challenge,onSubmit,challengeIndex,totalChallenges,unlocked
       ):(
         <div style={{display:"flex",flexDirection:"column",gap:12,animation:"popIn .4s ease"}}>
           {/* Result */}
-          <div style={{background:result?.hit?`${C.green}15`:`${C.red}15`,border:`2px solid ${result?.hit?C.green:C.red}55`,borderRadius:16,padding:18}}>
+          <div role="status" aria-live="polite" style={{background:result?.hit?`${C.green}15`:`${C.red}15`,border:`2px solid ${result?.hit?C.green:C.red}55`,borderRadius:16,padding:18}}>
             <div style={{fontFamily:"Impact,sans-serif",fontSize:28,color:result?.hit?C.green:C.red,marginBottom:8,filter:`drop-shadow(0 0 8px ${result?.hit?C.green:C.red})`}}>
               {result?.hit?"✅ ACERTOU!":"❌ QUASE! AJUSTA O PLANO"}
             </div>
@@ -1734,7 +1858,7 @@ function M3Challenge({challenge,onSubmit,challengeIndex,totalChallenges,unlocked
           <div style={{background:C.surface,borderLeft:`4px solid ${challenge.categoryColor}`,borderRadius:"0 12px 12px 0",padding:"12px 14px"}}>
             <p style={{color:C.grayLt,fontSize:13,lineHeight:1.7,margin:0}}>{challenge.tip}</p>
           </div>
-          <Btn onClick={()=>onSubmit({text:result?.text||"",found:result?.found||[],bonus:result?.bonus||[],newAllies:result?.newAllies||[],total:result?.total||0,hit:result?.hit||false})}
+          <Btn onClick={()=>onSubmit(createPreventionSubmission(result))}
             color={challenge.categoryColor} size="lg" style={{width:"100%",color:"#000"}}>
             {challengeIndex<totalChallenges-1?"BORA PRA PRÓXIMA →":"🏁 FINALIZAR MÓDULO 3"}
           </Btn>
@@ -1783,7 +1907,7 @@ function M3Compendium({responses,onBack}){
         const r=responses[i];const answered=r&&r.hit;
         return(
           <div key={ch.id}>
-            <button onClick={()=>setOpen(open===i?null:i)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:answered?`${ch.categoryColor}15`:C.surface,border:`1px solid ${answered?ch.categoryColor+"44":C.border}`,borderRadius:open===i?"14px 14px 0 0":14,textAlign:"left"}}>
+            <button onClick={()=>setOpen(open===i?null:i)} aria-expanded={open===i} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:answered?`${ch.categoryColor}15`:C.surface,border:`1px solid ${answered?ch.categoryColor+"44":C.border}`,borderRadius:open===i?"14px 14px 0 0":14,textAlign:"left"}}>
               <span style={{fontSize:24}}>{ch.icon}</span>
               <div style={{flex:1}}>
                 <div style={{color:answered?C.white:C.grayLt,fontWeight:700,fontSize:14}}>{ch.category}</div>
@@ -1904,7 +2028,7 @@ function M3Result({responses,prevScore,onCompendium,onNext}){
 // ═══════════════════════════════════════════════════════════════════════════════
 // MÓDULO 4 — CAÇADOR DE ALERTAS
 // ═══════════════════════════════════════════════════════════════════════════════
-const M4_SYMPTOMS=[
+export const M4_SYMPTOMS=[
   // real:true = sinal de alarme quando surge com PA muito alta ou início súbito; não é diagnóstico de hipertensão.
   {id:1,text:"Dor ou aperto no peito",emoji:"💔",real:true,tip:"Dor no peito pode indicar lesão aguda do coração. Se vier com pressão muito alta, é sinal de emergência."},
   {id:2,text:"Falta de ar importante",emoji:"😮‍💨",real:true,tip:"Falta de ar intensa pode indicar comprometimento cardíaco ou pulmonar e merece atendimento rápido."},
@@ -2000,7 +2124,7 @@ function M4Game({onFinish}){
       </div>
 
       {submitted&&(
-        <div style={{textAlign:"center",background:perfect?`${C.green}15`:`${C.amber}11`,border:`1px solid ${perfect?C.green:C.amber}44`,borderRadius:16,padding:"16px 12px",animation:"popIn .4s ease"}}>
+        <div role="status" aria-live="polite" style={{textAlign:"center",background:perfect?`${C.green}15`:`${C.amber}11`,border:`1px solid ${perfect?C.green:C.amber}44`,borderRadius:16,padding:"16px 12px",animation:"popIn .4s ease"}}>
           <div style={{fontSize:44,marginBottom:4}}>{perfect?"🏆":correctHits>=4?"🥇":correctHits>=3?"🥈":"🥉"}</div>
           <div style={{fontFamily:"Impact,sans-serif",fontSize:40,color:perfect?C.green:C.amber,filter:`drop-shadow(0 0 10px ${perfect?C.green:C.amber})`}}>{score} <span style={{fontSize:18,color:C.gray}}>pts</span></div>
           {perfect&&<div style={{color:C.green,fontSize:13,fontWeight:700,marginTop:4}}>🎉 PERFEITO! Todos os sinais de alerta encontrados!</div>}
@@ -2012,7 +2136,7 @@ function M4Game({onFinish}){
           const isSel=selected.has(s.id);
           const cs=getCardSt(s);
           return(
-            <button key={s.id} onClick={()=>toggle(s.id)}
+            <button key={s.id} onClick={()=>toggle(s.id)} aria-pressed={isSel} disabled={submitted}
               style={{background:cs.bg,border:cs.bd,transform:cs.transform,boxShadow:cs.shadow,borderRadius:14,padding:"12px 8px",display:"flex",flexDirection:"column",alignItems:"center",gap:5,cursor:submitted?"default":"pointer",transition:"all .18s",minHeight:86,color:C.white,animation:submitted&&isSel?(s.real?"correctPop .42s ease":"wrongBuzz .42s ease"):"none"}}>
               <span style={{fontSize:26}}>{s.emoji}</span>
               <span style={{fontSize:10,fontWeight:700,textAlign:"center",lineHeight:1.3}}>{s.text}</span>
@@ -2102,8 +2226,8 @@ function M4Result({score,perfect,totalScore,onNext}){
 // ═══════════════════════════════════════════════════════════════════════════════
 // MÓDULO 5 — CONSEQUÊNCIAS (SIMULAÇÃO NARRATIVA)
 // ═══════════════════════════════════════════════════════════════════════════════
-// Banco de cenários M5 — 10 casos, 3 sorteados por jogo
-const M5_SCENARIOS_BANK=[
+// Banco de cenários M5 — 18 casos, 4 sorteados por jogo
+export const M5_SCENARIOS_BANK=[
   {id:"avc",icon:"🧠",title:"AVC",color:C.red,
    intro:"João, 45 anos. Pressão 180/110 mmHg há meses sem tratamento. Hoje tudo muda.",
    steps:[
@@ -2453,7 +2577,7 @@ function M5Game({onFinish}){
                 else{bdr=`2px solid ${C.border}44`;}
               }else if(sel===i){bg=`${sc.color}22`;bdr=`2px solid ${sc.color}`;col=C.white;}
               return(
-                <button key={i} onClick={()=>choose(i)} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"13px 15px",background:bg,border:bdr,borderRadius:13,textAlign:"left",width:"100%",cursor:showFb?"default":"pointer",animation:showFb&&i===sel?(ch.ok?"correctPop .45s ease":"wrongBuzz .42s ease"):"none"}}>
+                <button key={i} onClick={()=>choose(i)} aria-pressed={sel===i} disabled={showFb} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"13px 15px",background:bg,border:bdr,borderRadius:13,textAlign:"left",width:"100%",cursor:showFb?"default":"pointer",animation:showFb&&i===sel?(ch.ok?"correctPop .45s ease":"wrongBuzz .42s ease"):"none"}}>
                   <div style={{width:28,height:28,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:12,background:showFb&&i===sel&&ch.ok?C.green:showFb&&i===sel&&!ch.ok?C.red:`${sc.color}22`,border:`2px solid ${showFb&&i===sel&&ch.ok?C.green:showFb&&i===sel&&!ch.ok?C.red:sc.color}`,color:showFb&&i===sel?"#000":sc.color}}>
                     {showFb&&i===sel?(ch.ok?"✓":"✗"):String.fromCharCode(65+i)}
                   </div>
@@ -2536,12 +2660,12 @@ function M5Result({score,totalDamage,onNext}){
 // MÓDULO 6 — COMO AJUDAR MINHA FAMÍLIA ONDE MORO
 // ═══════════════════════════════════════════════════════════════════════════════
 const M6_ACTIONS=[
-  {id:1,icon:"🩺",title:"Ir ao posto de saúde",desc:"Leve sua família à UBS (Unidade Básica de Saúde) para medir a pressão arterial. O serviço é gratuito pelo SUS em todo o Brasil.",commitment:"Me comprometo a levar minha família à UBS este mês",color:C.teal},
+  {id:1,icon:"🩺",title:"Conversar sobre medir a pressão",desc:"Converse com um adulto responsável sobre procurar uma UBS ou serviço de saúde disponível na sua região para medir a pressão e receber orientação.",commitment:"Vou conversar com um adulto responsável sobre onde medir a pressão",color:C.teal},
   {id:2,icon:"🧂",title:"Cozinhar com menos sal",desc:"Proponha receitas com menos sódio em casa. Use temperos naturais como alho, cebola, orégano e limão no lugar do sal.",commitment:"Me comprometo a ajudar a cozinhar com menos sal",color:C.green},
   {id:3,icon:"🚶",title:"Caminhar junto em família",desc:"Convide seus familiares para caminhar 30 minutos, pelo menos 3 vezes por semana. A atividade física em grupo é mais fácil de manter.",commitment:"Me comprometo a caminhar com minha família 3x/semana",color:C.amber},
   {id:4,icon:"💬",title:"Conversar sobre o histórico",desc:"Pergunte aos seus pais e avós sobre doenças da família. Conhecer o histórico é o primeiro passo para a prevenção.",commitment:"Me comprometo a conversar com minha família sobre saúde",color:C.purple},
   {id:5,icon:"📱",title:"Compartilhar o que aprendi",desc:"Use suas redes sociais para conscientizar amigos e colegas sobre hipertensão. Compartilhe informação confiável e incentive quem precisa a procurar atendimento.",commitment:"Me comprometo a compartilhar informação confiável sobre hipertensão",color:C.navy},
-  {id:6,icon:"💊",title:"Ajudar com a medicação",desc:"Se alguém na família usa remédio para pressão, ajude a lembrar de tomar. A adesão ao tratamento é um dos maiores desafios.",commitment:"Me comprometo a ajudar minha família com o tratamento",color:C.red},
+  {id:6,icon:"💊",title:"Apoiar sem mexer nos remédios",desc:"Você pode incentivar o acompanhamento e avisar um adulto responsável sobre dúvidas. Nunca altere doses, ofereça ou organize remédios por conta própria.",commitment:"Vou apoiar com segurança e chamar um adulto quando houver dúvida sobre tratamento",color:C.red},
 ];
 
 function M6Intro({onStart}){
@@ -2604,7 +2728,7 @@ function M6Game({onFinish}){
                 {isDone&&<span style={{marginLeft:"auto",color:action.color,fontSize:14,fontWeight:800}}>✓</span>}
               </div>
               <p style={{color:C.grayLt,fontSize:13,lineHeight:1.6,margin:"0 0 12px"}}>{action.desc}</p>
-              <Btn onClick={()=>commit(action.id)} disabled={blocked} color={isDone?C.gray:action.color} style={{width:"100%",color:isDone?C.white:"#000",fontSize:13}}>
+              <Btn onClick={()=>commit(action.id)} aria-pressed={isDone} disabled={blocked} color={isDone?C.gray:action.color} style={{width:"100%",color:isDone?C.white:"#000",fontSize:13}}>
                 {isDone?"↩ TROCAR ESTA ESCOLHA":`🤝 QUERO TENTAR: ${action.title}`}
               </Btn>
             </div>
@@ -2625,7 +2749,7 @@ function M6Game({onFinish}){
 // ═══════════════════════════════════════════════════════════════════════════════
 // Banco do quiz final — 12 perguntas por módulo = 72 total
 // A cada jogo 1 é sorteada de cada módulo = 6 perguntas únicas
-const FINAL_QUIZ_BANK=[
+export const FINAL_QUIZ_BANK=[
   // ── Módulo 1 ──────────────────────────────────────────────────────────────
   {id:"m1a",module:"Módulo 1",moduleColor:C.red,icon:"❤️",
    q:"Qual desses hábitos aumenta MAIS o risco de hipertensão?",
@@ -2728,24 +2852,24 @@ const FINAL_QUIZ_BANK=[
   // ── Módulo 4 ──────────────────────────────────────────────────────────────
   {id:"m4a",module:"Módulo 4",moduleColor:C.red,icon:"🔍",
    q:"Qual situação é sinal de alarme e pede atendimento rápido?",
-   opts:["Febre alta","Tosse seca intensa","Dor de cabeça forte na nuca","Coceira na pele"],correct:2,
+   opts:["Coceira isolada","Dor no peito com falta de ar ou confusão","Cansaço depois de uma aula","Fome antes do almoço"],correct:1,
    exp:"Dor no peito, falta de ar importante, alteração neurológica, confusão, convulsão ou alteração visual súbita são sinais de alarme. Hipertensão, porém, muitas vezes não dá sintoma."},
   {id:"m4b",module:"Módulo 4",moduleColor:C.red,icon:"🔍",
    q:"Por que a hipertensão é chamada de 'assassina silenciosa'?",
    opts:["Porque mata à noite","Porque não tem sintomas na maioria dos casos","Porque é discreta nas consultas","Porque só aparece em idosos"],correct:1,
    exp:"Hipertensão frequentemente não causa sintomas. Por isso, diagnóstico depende de aferições corretas e confirmação conforme a faixa etária e o contexto clínico."},
   {id:"m4c",module:"Módulo 4",moduleColor:C.red,icon:"🔍",
-   q:"Qual sintoma NÃO é associado à hipertensão severa?",
-   opts:["Dor de cabeça na nuca","Visão embaçada","Tontura","Febre acima de 39°C"],correct:3,
-   exp:"Febre alta sugere outras causas e não confirma hipertensão. Em pressão muito alta, podem ocorrer cefaleia, alteração visual, dor no peito, falta de ar, confusão ou outros sinais de lesão aguda."},
+   q:"Qual afirmação evita uma confusão comum sobre hipertensão?",
+   opts:["Só existe hipertensão quando dói a cabeça","Tontura sempre confirma pressão alta","Sintomas isolados não confirmam hipertensão; é preciso medir corretamente","Quem está bem nunca precisa medir"],correct:2,
+   exp:"Hipertensão costuma ser silenciosa. Sintomas podem ter muitas causas e não confirmam pressão alta sem aferição adequada."},
   {id:"m4d",module:"Módulo 4",moduleColor:C.red,icon:"🔍",
    q:"O que torna a hipertensão perigosa mesmo sem sintomas?",
    opts:["Ela pode danificar vasos e órgãos lentamente","Ela muda a cor da pele","Ela sempre dá febre","Ela só aparece durante esportes"],correct:0,
    exp:"A pressão alta pode machucar coração, rins, cérebro e olhos por muito tempo antes de gerar sinais claros."},
   {id:"m4e",module:"Módulo 4",moduleColor:C.red,icon:"🔍",
-   q:"Qual sinal pode aparecer em uma crise hipertensiva?",
-   opts:["Visão embaçada ou dor forte na cabeça","Crescimento instantâneo","Cabelo ficando branco","Alergia a frutas"],correct:0,
-   exp:"Visão embaçada, dor forte na cabeça, tontura e falta de ar podem indicar situação de alerta."},
+   q:"Quando uma pressão muito alta exige avaliação urgente?",
+   opts:["Quando vem com sinais de lesão aguda, como dor no peito, falta de ar importante, confusão ou déficit neurológico","Sempre que alguém espirra","Somente se a pessoa estiver com fome","Apenas quando ocorre depois de exercício"],correct:0,
+   exp:"A urgência depende do quadro completo e de sinais de possível lesão de órgãos. Não use sintomas isolados para diagnosticar hipertensão."},
   {id:"m4f",module:"Módulo 4",moduleColor:C.red,icon:"🔍",
    q:"Qual é a melhor forma de confirmar pressão alta?",
    opts:["Adivinhar pelos sintomas","Medir com aparelho adequado e repetir quando necessário","Olhar a cor dos olhos","Contar quantas horas usou celular"],correct:1,
@@ -2799,7 +2923,7 @@ const FINAL_QUIZ_BANK=[
   {id:"m6b",module:"Módulo 6",moduleColor:C.teal,icon:"🏥",
    q:"Qual é o número correto para chamar o SAMU no Brasil?",
    opts:["190","192","193","197"],correct:1,
-   exp:"192 é o número do SAMU. Funciona 24h, gratuitamente, em todo o Brasil. Salve agora no seu celular!"},
+   exp:"192 é o número gratuito do SAMU. O serviço funciona 24 horas nas áreas cobertas; também siga a orientação de emergência disponível no seu município."},
   {id:"m6c",module:"Módulo 6",moduleColor:C.teal,icon:"🏥",
    q:"Se alguém está com pressão muito alta e sinais de alarme, qual atitude é a mais segura?",
    opts:["Dar dose extra de remédio por conta própria","Ligar para o SAMU (192)","Dar aspirina para 'diluir o sangue'","Mandar fazer exercício para baixar a pressão"],correct:1,
@@ -2925,7 +3049,7 @@ const FINAL_QUIZ_BANK=[
   {id:"m6l",module:"Módulo 6",moduleColor:C.teal,icon:"🏥",
    q:"Onde medir pressão de graça com a família?",
    opts:["Somente hospital particular","UBS / posto de saúde (SUS)","Só em competição esportiva","Em casa sem aparelho, adivinhando"],correct:1,
-   exp:"UBS oferece medição gratuita em todo o Brasil."},
+   exp:"A UBS é uma referência do SUS para buscar orientação; oferta e horários devem ser confirmados na sua região."},
 ];
 
 // Sorteia perguntas do quiz final: 2 por módulo (12 total), intercaladas para módulos diferentes em sequência
@@ -3017,7 +3141,7 @@ function QuizFinal({finalQuiz,onFinish}){
             else{border=`2px solid ${C.border}44`;}
           } else if(sel===i){bg=`${q.moduleColor}22`;border=`2px solid ${q.moduleColor}`;color=C.white;}
           return(
-            <button key={i} onClick={()=>choose(i)} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 15px",background:bg,border,borderRadius:13,textAlign:"left",animation:showFeedback&&i===sel?(i===q.correct?"correctPop .45s ease":"wrongBuzz .42s ease"):"none"}}>
+            <button key={i} onClick={()=>choose(i)} aria-pressed={sel===i} disabled={showFeedback} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 15px",background:bg,border,borderRadius:13,textAlign:"left",animation:showFeedback&&i===sel?(i===q.correct?"correctPop .45s ease":"wrongBuzz .42s ease"):"none"}}>
               <div style={{width:28,height:28,borderRadius:8,flexShrink:0,background:showFeedback&&i===q.correct?C.green:showFeedback&&i===sel&&i!==q.correct?C.red:`${q.moduleColor}22`,border:`2px solid ${showFeedback&&i===q.correct?C.green:showFeedback&&i===sel&&i!==q.correct?C.red:q.moduleColor}`,display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:900,fontSize:12}}>
                 {showFeedback&&i===q.correct?"✓":showFeedback&&i===sel&&i!==q.correct?"✗":String.fromCharCode(65+i)}
               </div>
@@ -3176,13 +3300,9 @@ function TrophyAnim({phase}){
         transition:"all .5s ease",
         zIndex:0,
       }}/>
-      <video
-        src={MEDIA.trophyVideo}
+      <MotionMedia
+        video={MEDIA.trophyVideo}
         poster={MEDIA.trophyStill}
-        autoPlay
-        muted
-        loop
-        playsInline
         style={{
           width:180,height:180,objectFit:"cover",borderRadius:20,
           display:"block",position:"relative",zIndex:1,
@@ -3278,16 +3398,14 @@ function buildSmartReport({m1Answers,m1Questions,m1Risk,quizAnswers,finalQuiz,m3
   const habitScore=100-(m1Risk||0);
   // O M2 não entra no agregado: desconhecer a história familiar não deve reduzir a nota.
   const smartScore=calculateLearningScore({
-    habits:habitScore,
     quiz:quizPct,
     prevention:preventionPct,
     alerts:symptomPct,
     decisions:consequencePct,
-    action:actionPct,
   });
 
   const domains=[
-    {id:"habits",label:"Hábitos e escolhas",value:habitScore,color:levelColor(habitScore),note:`Pontos de atenção no jogo: ${m1Risk||0}/100`},
+    {id:"habits",label:"Radar autorreferido de hábitos",value:habitScore,color:levelColor(habitScore),note:`Reflexão educativa; não estima risco: ${m1Risk||0}/100 pontos de atenção`},
     {id:"knowledge",label:"Conhecimento geral",value:quizPct,color:levelColor(quizPct),note:`Quiz final: ${quizCorrect}/${quizTotal||0}`},
     {id:"prevention",label:"Prevenção prática",value:preventionPct,color:levelColor(preventionPct),note:`${preventionHits}/${(m3Responses||[]).length||M3_CHALLENGES_PER_GAME} planos concluídos`},
     {id:"symptoms",label:"Sinais de alerta",value:symptomPct,color:levelColor(symptomPct),note:m4Perfect?"Caçada perfeita":"Reconhecimento de sinais de alarme"},
@@ -3325,6 +3443,7 @@ function buildSmartReport({m1Answers,m1Questions,m1Risk,quizAnswers,finalQuiz,m3
 function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,finalQuiz,totalScore,m3Responses,m4Score,m4Perfect,m5Score,m6Score,m6Commitments,onBack}){
   const prof=getRiskProfile(m1Risk||0);
   const riskColor=m1Risk>50?C.red:m1Risk>30?C.orange:m1Risk>15?C.yellow:C.green;
+  const reportDate=new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date());
   const analysis=buildSmartReport({m1Answers,m1Questions,m1Risk,quizAnswers,finalQuiz,m3Responses,m4Score,m4Perfect,m5Score,m6Score,m6Commitments});
   const {catRisk,quizResults,quizCorrect,quizTotal,domains,strengths,weaknesses,profile,smartScore,moduleStats,preventionHits,foundKeywords,allies}=analysis;
 
@@ -3340,8 +3459,32 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
   return(
     <div data-report style={{padding:"16px",display:"flex",flexDirection:"column",gap:20,animation:"fadeUp .4s ease"}}>
 
+      <div className="print-page-footer" aria-hidden="true">MATERIAL EDUCATIVO · SEM VALIDADE DIAGNÓSTICA · VERSÃO {APP_VERSION}</div>
+
+      {/* Folha timbrada exclusiva da impressão/PDF */}
+      <div className="print-letterhead" aria-hidden="true">
+        <div className="print-letterhead__mark">
+          <svg viewBox="0 0 64 64" role="img" aria-label="Símbolo do Desafio Hipertensão">
+            <path d="M32 52S10 39 10 22c0-8 5-13 13-13 5 0 8 3 9 7 2-4 5-7 10-7 8 0 13 5 13 13 0 17-23 30-23 30Z" strokeWidth="3"/>
+            <path d="M14 31h10l4-8 7 17 5-9h10" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div className="print-letterhead__brand">DESAFIO HIPERTENSÃO</div>
+          <div className="print-letterhead__subtitle">Conhecimento que protege · escolhas que transformam</div>
+        </div>
+        <div className="print-letterhead__meta">
+          Documento educacional<br/>
+          Versão {APP_VERSION} · {reportDate}
+        </div>
+        <div className="print-letterhead__title">
+          <p>Relatório individual de aprendizagem</p>
+          <h1>{playerName||"Participante"}</h1>
+        </div>
+      </div>
+
       {/* Header */}
-      <div style={{textAlign:"center",background:`linear-gradient(135deg,${C.yellow}18,${C.green}10)`,border:`2px solid ${C.yellow}44`,borderRadius:20,padding:"24px 16px"}}>
+      <div className="screen-report-header" style={{textAlign:"center",background:`linear-gradient(135deg,${C.yellow}18,${C.green}10)`,border:`2px solid ${C.yellow}44`,borderRadius:20,padding:"24px 16px"}}>
         <div style={{fontSize:52}}>📊</div>
         <div style={{fontFamily:"Impact,sans-serif",fontSize:26,letterSpacing:3,color:C.yellow,lineHeight:1.1}}>SEU RELATÓRIO</div>
         <div style={{fontFamily:"Impact,sans-serif",fontSize:14,color:C.white,letterSpacing:2,marginTop:4}}>DE APRENDIZAGEM</div>
@@ -3355,7 +3498,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
         <p style={{color:C.gray,fontSize:12,lineHeight:1.55,margin:"0 0 10px"}}>Você escolheu o que acredita conseguir tentar. Uma ação realista já completa esta missão.</p>
         <div style={{display:"flex",flexDirection:"column",gap:7}}>
           {(m6Commitments||[]).map(id=>M6_ACTIONS.find(action=>action.id===id)).filter(Boolean).map(action=>(
-            <div key={action.id} style={{display:"flex",alignItems:"flex-start",gap:9,background:`${action.color}10`,borderLeft:`3px solid ${action.color}`,borderRadius:"0 9px 9px 0",padding:"8px 10px"}}>
+            <div key={action.id} className="report-card" style={{display:"flex",alignItems:"flex-start",gap:9,background:`${action.color}10`,borderLeft:`3px solid ${action.color}`,borderRadius:"0 9px 9px 0",padding:"8px 10px"}}>
               <span>{action.icon}</span>
               <span style={{color:C.grayLt,fontSize:12,lineHeight:1.5}}>{action.commitment}</span>
             </div>
@@ -3366,11 +3509,11 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
       {/* Score summary */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
         {[
-          {label:"FICA LIGADO",val:`${m1Risk||0}/100`,sub:"no jogo",color:riskColor},
-          {label:"COMO VOCÊ SE SAIU",val:`${smartScore}%`,sub:"no desafio",color:profile.color},
+          {label:"HÁBITOS DECLARADOS",val:`${m1Risk||0}/100`,sub:"pontos de atenção",color:riskColor},
+          {label:"ÍNDICE DO JOGO*",val:`${smartScore}%`,sub:"experimental",color:profile.color},
           {label:"QUIZ FINAL",val:`${quizCorrect}/${quizTotal||0}`,sub:"acertos",color:C.green},
         ].map(({label,val,sub,color})=>(
-          <div key={label} style={{background:C.card,border:`1px solid ${color}44`,borderRadius:14,padding:"14px 8px",textAlign:"center"}}>
+          <div key={label} className="report-card" style={{background:C.card,border:`1px solid ${color}44`,borderRadius:14,padding:"14px 8px",textAlign:"center"}}>
             <div style={{color:C.gray,fontSize:9,fontWeight:700,letterSpacing:1.5,marginBottom:4}}>{label}</div>
             <div style={{fontFamily:"Impact,sans-serif",fontSize:28,color,lineHeight:1,filter:`drop-shadow(0 0 6px ${color})`}}>{val}</div>
             <div style={{color:C.gray,fontSize:10,marginTop:2}}>{sub}</div>
@@ -3379,7 +3522,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
       </div>
 
       <div style={{background:`${C.teal}0d`,border:`1px solid ${C.teal}33`,borderRadius:13,padding:"11px 13px"}}>
-        <p style={{color:C.grayLt,fontSize:11,lineHeight:1.55,margin:0}}>ℹ️ Importante: esses números são só do jogo, beleza? Eles não dizem se sua pressão está alta, não calculam risco cardiovascular e não funcionam como diagnóstico.</p>
+        <p style={{color:C.grayLt,fontSize:11,lineHeight:1.55,margin:0}}>ℹ️ *Índice simples de gamificação, calculado pela média das atividades de conhecimento e decisão. Não é instrumento validado. Esses números não dizem se sua pressão está alta, não calculam risco cardiovascular e não funcionam como diagnóstico.</p>
       </div>
 
       <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:16,padding:16}}>
@@ -3394,7 +3537,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
             ["5","Consequências","Entender por que pressão alta sem controle pode dar ruim com o tempo.",C.orange],
             ["6","Como ajudar","Treinar decisões seguras e saber a hora de chamar ajuda.",C.teal],
           ].map(([n,title,text,color])=>(
-            <div key={n} style={{background:`${color}0d`,border:`1px solid ${color}2f`,borderRadius:11,padding:"10px 11px"}}>
+            <div key={n} className="report-card" style={{background:`${color}0d`,border:`1px solid ${color}2f`,borderRadius:11,padding:"10px 11px"}}>
               <div style={{color,fontSize:10,fontWeight:900,letterSpacing:1}}>MÓDULO {n}</div>
               <div style={{color:C.white,fontSize:12,fontWeight:800,margin:"2px 0 4px"}}>{title}</div>
               <div style={{color:C.grayLt,fontSize:11,lineHeight:1.45}}>{text}</div>
@@ -3448,7 +3591,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
         <div style={{background:C.card,border:`1px solid ${C.green}33`,borderRadius:16,padding:16}}>
           <div style={{fontFamily:"Impact,sans-serif",fontSize:17,color:C.green,letterSpacing:2,marginBottom:10}}>✅ ONDE VOCÊ MANDOU BEM</div>
           {(strengths.length?strengths:[{title:"Você chegou até o fim",body:"Só chegar até aqui já mostra que você entrou no desafio. Agora bora levar alguma coisa dele pra vida real.",color:C.green}]).map((s,i)=>(
-            <div key={`${s.title}-${i}`} style={{background:`${s.color}10`,borderLeft:`3px solid ${s.color}`,borderRadius:"0 10px 10px 0",padding:"9px 11px",marginBottom:8}}>
+            <div key={`${s.title}-${i}`} className="report-card" style={{background:`${s.color}10`,borderLeft:`3px solid ${s.color}`,borderRadius:"0 10px 10px 0",padding:"9px 11px",marginBottom:8}}>
               <div style={{color:s.color,fontWeight:900,fontSize:12}}>{s.title}</div>
               <div style={{color:C.grayLt,fontSize:12,lineHeight:1.5,marginTop:2}}>{s.body}</div>
             </div>
@@ -3458,7 +3601,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
         <div style={{background:C.card,border:`1px solid ${C.orange}33`,borderRadius:16,padding:16}}>
           <div style={{fontFamily:"Impact,sans-serif",fontSize:17,color:C.orange,letterSpacing:2,marginBottom:10}}>🎯 ONDE DÁ PRA SUBIR DE NÍVEL</div>
           {(weaknesses.length?weaknesses:[{title:"Continua no jogo",body:"Você foi bem. O próximo nível é fazer esse cuidado aparecer fora da tela também.",action:"Chama alguém de casa pra conversar sobre pressão e, se houver indicação, medir do jeito certo.",color:C.teal}]).map((w,i)=>(
-            <div key={`${w.title}-${i}`} style={{background:`${w.color}10`,borderLeft:`3px solid ${w.color}`,borderRadius:"0 10px 10px 0",padding:"9px 11px",marginBottom:8}}>
+            <div key={`${w.title}-${i}`} className="report-card" style={{background:`${w.color}10`,borderLeft:`3px solid ${w.color}`,borderRadius:"0 10px 10px 0",padding:"9px 11px",marginBottom:8}}>
               <div style={{color:w.color,fontWeight:900,fontSize:12}}>{w.title}</div>
               <div style={{color:C.grayLt,fontSize:12,lineHeight:1.5,marginTop:2}}>{w.body}</div>
               <div style={{color:C.white,fontSize:12,lineHeight:1.5,marginTop:5}}><strong style={{color:w.color}}>Bora tentar: </strong>{w.action}</div>
@@ -3473,7 +3616,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
         <p style={{color:C.gray,fontSize:12,marginTop:0,marginBottom:14}}>Pontuação total: {totalScore} pts · planos concluídos: {preventionHits}/{(m3Responses||[]).length||M3_CHALLENGES_PER_GAME} · cartas-chave: {foundKeywords.length} · aliados: {allies.length}/{ALLIES.length}</p>
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {moduleStats.map(m=>(
-            <div key={m.module} style={{background:C.surface,border:`1px solid ${m.color}33`,borderRadius:12,padding:"10px 13px"}}>
+            <div key={m.module} className="report-card" style={{background:C.surface,border:`1px solid ${m.color}33`,borderRadius:12,padding:"10px 13px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                 <span style={{color:C.white,fontWeight:800,fontSize:13}}>{m.name}</span>
                 <span style={{color:m.color,fontWeight:900,fontSize:12}}>{m.total?`${m.correct}/${m.total}`:"jogado"}</span>
@@ -3497,13 +3640,13 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
               const col=riskPct>60?C.red:riskPct>35?C.orange:riskPct>15?C.yellow:C.green;
               const tip=CAT_TIPS[cat];
               return(
-                <div key={cat} style={{background:C.card,border:`1px solid ${col}33`,borderRadius:12,padding:"10px 13px"}}>
+                <div key={cat} className="report-card" style={{background:C.card,border:`1px solid ${col}33`,borderRadius:12,padding:"10px 13px"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                     <span style={{color:C.white,fontWeight:700,fontSize:13}}>{cat}</span>
                     <span style={{color:col,fontWeight:800,fontSize:12}}>{riskPct>0?`⚠️ ${riskPct} pra ficar ligado`:"✅ Tá tranquilo aqui"}</span>
                   </div>
-                  <div style={{height:6,background:C.border,borderRadius:99,overflow:"hidden",marginBottom:riskPct>15?8:0}}>
-                    <div style={{width:`${riskPct}%`,height:"100%",background:`linear-gradient(90deg,${col}88,${col})`,borderRadius:99}}/>
+                  <div className="report-progress" style={{height:6,background:C.border,borderRadius:99,overflow:"hidden",marginBottom:riskPct>15?8:0}}>
+                    <div className="report-progress__fill" style={{width:`${riskPct}%`,height:"100%",background:`linear-gradient(90deg,${col}88,${col})`,borderRadius:99}}/>
                   </div>
                   {riskPct>15&&<p style={{color:C.grayLt,fontSize:12,margin:0,lineHeight:1.5}}>{tip?.tip||"Vale ficar ligado nesse tema!"}</p>}
                   {riskPct===0&&<p style={{color:C.green,fontSize:12,margin:0}}>{tip?.good||"Mandou bem. Segue nessa!"}</p>}
@@ -3523,7 +3666,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
               const col=risk>15?C.red:risk>5?C.yellow:C.green;
               const safest=q.opts[0];
               return(
-                <div key={q.id} style={{background:C.surface,border:`1px solid ${col}33`,borderRadius:13,padding:"12px 14px"}}>
+                <div key={q.id} className="report-card" style={{background:C.surface,border:`1px solid ${col}33`,borderRadius:13,padding:"12px 14px"}}>
                   <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:6,flexWrap:"wrap"}}>
                     <Tag label={q.cat.split(" ")[0]} color={col}/>
                     <span style={{marginLeft:"auto",color:col,fontWeight:800,fontSize:12}}>
@@ -3558,7 +3701,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
               if(!r.question)return null;
               const q=r.question;
               return(
-                <div key={i} style={{background:C.card,border:`1px solid ${r.correct?C.green:C.red}44`,borderRadius:14,padding:14}}>
+                <div key={i} className="report-card" style={{background:C.card,border:`1px solid ${r.correct?C.green:C.red}44`,borderRadius:14,padding:14}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <span style={{fontSize:20}}>{q.icon}</span>
                     <Tag label={q.module} color={q.moduleColor}/>
@@ -3590,7 +3733,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
         <div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.teal,letterSpacing:3,marginBottom:14}}>🎓 LEVA ISSO COM VOCÊ</div>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           {CONCLUSION.map(({emoji,title,text})=>(
-            <div key={title} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+            <div key={title} className="report-card" style={{display:"flex",gap:12,alignItems:"flex-start"}}>
               <span style={{fontSize:22,flexShrink:0}}>{emoji}</span>
               <div>
                 <div style={{color:C.white,fontWeight:800,fontSize:13,marginBottom:3}}>{title}</div>
@@ -3602,14 +3745,15 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
       </div>
 
       {/* Rodapé */}
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:13,padding:14,textAlign:"center"}}>
+      <div className="report-footer" style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:13,padding:14,textAlign:"center"}}>
         <p style={{color:C.grayDk,fontSize:11,margin:"0 0 3px"}}>⚕️ Diretriz Brasileira de Hipertensão 2025 · OMS 2020 · AASM · AHA/ASA 2026</p>
-        <p style={{color:C.grayDk,fontSize:11,margin:0}}>Relatório educativo. Não é diagnóstico e não substitui avaliação de um profissional de saúde.</p>
+        <p style={{color:C.grayDk,fontSize:11,margin:0}}>Relatório educativo · versão {APP_VERSION}. Não é diagnóstico, prontuário ou instrumento validado e não substitui avaliação profissional.</p>
       </div>
 
       {/* Botões — sumem no PDF */}
       <div style={{display:"flex",flexDirection:"column",gap:10}} className="no-print">
-        <Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>📄 SALVAR MEU RELATÓRIO</Btn>
+        <div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🔒 O PDF pode conter seu apelido, hábitos e informações familiares. Salve apenas em um dispositivo seguro e compartilhe somente com sua autorização.</div>
+        <Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>🖨️ IMPRIMIR OU SALVAR EM PDF</Btn>
         <Btn onClick={onBack} color={C.gray} outline size="lg" style={{width:"100%"}}>← VOLTAR PRO FINAL</Btn>
       </div>
     </div>
@@ -3641,13 +3785,9 @@ function VictoryScreen({totalScore,quizAnswers,playerName,finalQuiz,onRestart,on
       {phase>=1&&<Confetti/>}
       {/* Background full-screen — vídeo do troféu */}
       <div aria-hidden style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden"}}>
-        <video
-          src={MEDIA.trophyVideo}
+        <MotionMedia
+          video={MEDIA.trophyVideo}
           poster={MEDIA.trophyStill}
-          autoPlay
-          muted
-          loop
-          playsInline
           style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",filter:"saturate(1.15) brightness(0.55)"}}
         />
         <div style={{position:"absolute",inset:0,background:`linear-gradient(180deg,${C.bg}88 0%,${C.bg}bb 45%,${C.bg}f0 100%)`}}/>
@@ -3772,6 +3912,7 @@ export default function PressaoQuest(){
   const [finalQuiz,setFinalQuiz]=useState(()=>pickFinalQuiz());
   const [quizScore,setQuizScore]=useState(0);
   const [quizAnswers,setQuizAnswers]=useState([]);
+  const mainRef=useRef(null);
 
   const totalScore=m1Score+calcExplorerScore(members)+m3Responses.reduce((s,r)=>s+(r?.total||0),0)+m4Score+m5Score+m6Score+quizScore;
   const screenModules={
@@ -3787,6 +3928,10 @@ export default function PressaoQuest(){
   const currentModuleLabel={1:"Hábitos",2:"Família",3:"Prevenção",4:"Alertas",5:"Consequências",6:"Ação familiar",quiz:"Quiz final",report:"Relatório"}[currentModule]||"Pressão Quest";
 
   useEffect(()=>{SFX.setMuted(!soundOn);},[soundOn]);
+  useEffect(()=>{
+    mainRef.current?.focus();
+    window.scrollTo({top:0,behavior:"auto"});
+  },[screen]);
 
   // M1
   const finishM1=(ans,questions)=>{
@@ -3861,13 +4006,15 @@ export default function PressaoQuest(){
   return(
     <div style={{minHeight:"100vh",background:C.bg,color:C.white,fontFamily:"'Segoe UI',system-ui,sans-serif",position:"relative"}}>
       <style>{GLOBAL_CSS}</style>
+      <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
       <ThreeBackground moduleColor={moduleColor}/>
       <ModuleAura color={moduleColor} label={currentModuleLabel}/>
       <SoundToggle on={soundOn} onToggle={()=>setSoundOn(v=>!v)}/>
 
       {screen!=="home"&&screen!=="devpanel"&&<TopBar module={currentModule} score={totalScore} onBack={screen==="report"?()=>setScreen("victory"):undefined}/>}
 
-      <main key={screen} style={{width:"100%",maxWidth:560,margin:"0 auto",position:"relative",zIndex:1,animation:"screenEnter .32s cubic-bezier(.4,0,.2,1)"}}>
+      <main id="main-content" ref={mainRef} tabIndex={-1} key={screen} aria-labelledby="screen-title" style={{width:"100%",maxWidth:560,margin:"0 auto",position:"relative",zIndex:1,animation:"screenEnter .32s cubic-bezier(.4,0,.2,1)"}}>
+        <h1 id="screen-title" className="sr-only">Desafio Hipertensão — {currentModuleLabel}</h1>
         {screen==="home"&&<M1Home onStart={()=>setScreen("name")} playerName={playerName} onDevUnlock={()=>setScreen("devpanel")}/>}
         {screen==="devpanel"&&<DevPanel onJump={devJumpTo} onClose={()=>setScreen("home")}/>}
         {screen==="name"&&<M1Name onConfirm={n=>{setPlayerName(n);setScreen("m1quiz");}}/>}
@@ -3929,4 +4076,20 @@ export default function PressaoQuest(){
       </main>
     </div>
   );
+}
+
+export class AppErrorBoundary extends Component{
+  constructor(props){super(props);this.state={hasError:false};}
+  static getDerivedStateFromError(){return{hasError:true};}
+  componentDidCatch(error,info){console.error("Falha inesperada no Desafio Hipertensão",error,info);}
+  render(){
+    if(!this.state.hasError)return this.props.children;
+    return <div role="alert" style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:24,background:C.bg,color:C.white,fontFamily:"system-ui,sans-serif"}}>
+      <div style={{maxWidth:480,background:C.card,border:`1px solid ${C.red}66`,borderRadius:18,padding:24,textAlign:"center"}}>
+        <h1 style={{fontSize:24,marginBottom:12}}>Não foi possível carregar esta etapa</h1>
+        <p style={{color:C.grayLt,lineHeight:1.6,marginBottom:18}}>O jogo encontrou uma falha inesperada. Nenhuma resposta foi enviada para um servidor.</p>
+        <button onClick={()=>window.location.reload()} style={{minHeight:44,padding:"10px 18px",borderRadius:10,border:0,background:C.teal,color:"#000",fontWeight:800}}>REINICIAR O JOGO</button>
+      </div>
+    </div>;
+  }
 }
