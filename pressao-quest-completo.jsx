@@ -1,4 +1,5 @@
 import { Component, useState, useEffect, useRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   MODULE_MAX_POINTS,
   calculateActionScore,
@@ -24,7 +25,7 @@ const C = {
   navy:"#60a5fa",white:"#f0f4ff",gray:"#a7b3c6",grayDk:"#8d9bb0",grayLt:"#cbd5e1",
 };
 
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.2.0";
 
 const MODULE_ART = {
   1: "/modules/m1-quiz-risco.webp",
@@ -939,7 +940,7 @@ function ThreeBackground({ moduleColor }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // MÓDULO 1 SCREENS
 // ═══════════════════════════════════════════════════════════════════════════════
-function M1Home({onStart,playerName,onDevUnlock}){
+function M1Home({onStart,onShowcase,playerName,onDevUnlock}){
   const devEnabled=import.meta.env.DEV&&new URLSearchParams(window.location.search).has("dev");
   const [showDevModal,setShowDevModal]=useState(false);
   const [showSources,setShowSources]=useState(false);
@@ -977,6 +978,7 @@ function M1Home({onStart,playerName,onDevUnlock}){
           </div>
           <Tag label="6 Módulos · Game educativo" color={C.red}/>
           <Btn onClick={onStart} color={C.red} size="lg" style={{width:"100%",maxWidth:320,boxShadow:`0 0 28px ${C.red}66`}}>INICIAR QUEST ▶</Btn>
+          <Btn onClick={onShowcase} color={C.teal} outline size="lg" style={{width:"100%",maxWidth:320,background:`${C.bg}bb`,backdropFilter:"blur(10px)"}}>⚡ MODO MOSTRA · 3 MIN</Btn>
         </div>
 
         {showDevModal&&(
@@ -3069,6 +3071,136 @@ function pickFinalQuiz(){
   return out;
 }
 
+export const SHOWCASE_QUESTION_IDS=["m1b","m2h","m3b","m4a","m5d","m6b"];
+export const SHOWCASE_QUESTIONS=SHOWCASE_QUESTION_IDS.map(id=>FINAL_QUIZ_BANK.find(question=>question.id===id)).filter(Boolean);
+
+function ShowcaseMode({onExit}){
+  const [stage,setStage]=useState("intro");
+  const [index,setIndex]=useState(0);
+  const [selected,setSelected]=useState(null);
+  const [answers,setAnswers]=useState([]);
+  const [copied,setCopied]=useState(false);
+  const question=SHOWCASE_QUESTIONS[index];
+  const correctCount=answers.filter(answer=>answer.correct).length;
+  const showcaseUrl=typeof window!=="undefined"?`${window.location.origin}${window.location.pathname}?modo=mostra`:"";
+
+  const start=()=>{setStage("playing");setIndex(0);setSelected(null);setAnswers([]);SFX.unlock();};
+  const choose=optionIndex=>{
+    if(selected!==null)return;
+    setSelected(optionIndex);
+    const correct=optionIndex===question.correct;
+    setAnswers(previous=>[...previous,{id:question.id,selected:optionIndex,correct}]);
+    correct?SFX.correct():SFX.wrong();
+  };
+  const next=()=>{
+    if(index<SHOWCASE_QUESTIONS.length-1){setIndex(value=>value+1);setSelected(null);SFX.click();}
+    else{setStage("done");SFX.unlock();}
+  };
+  const copyLink=async()=>{
+    try{await navigator.clipboard.writeText(showcaseUrl);setCopied(true);setTimeout(()=>setCopied(false),1800);}
+    catch{setCopied(false);}
+  };
+
+  if(stage==="intro")return(
+    <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",gap:18,justifyContent:"center",animation:"fadeUp .4s ease"}}>
+      <div style={{position:"relative",overflow:"hidden",background:`linear-gradient(155deg,${C.teal}1f,${C.card} 45%,${C.red}16)`,border:`1px solid ${C.teal}66`,borderRadius:26,padding:"26px 20px",boxShadow:`0 0 70px ${C.teal}18`}}>
+        <div aria-hidden="true" style={{position:"absolute",right:-45,top:-45,width:160,height:160,borderRadius:"50%",border:`28px solid ${C.teal}12`}}/>
+        <div style={{position:"relative"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:18}}>
+            <Tag label="Mostra de Produtos · 2026" color={C.teal}/>
+            <span style={{color:C.grayLt,fontSize:12,fontWeight:800}}>≈ 3 MIN</span>
+          </div>
+          <div style={{fontFamily:"Impact,sans-serif",fontSize:38,lineHeight:.95,letterSpacing:2,color:C.white}}>ROTA EXPRESSA</div>
+          <div style={{fontFamily:"Impact,sans-serif",fontSize:22,lineHeight:1.1,letterSpacing:3,color:C.teal,marginTop:7}}>DESAFIO HIPERTENSÃO</div>
+          <p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 20px"}}>Passe por seis checkpoints e conheça a essência do produto sem informar nome, hábitos ou histórico familiar.</p>
+          <div aria-label="Seis módulos da rota" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,marginBottom:22}}>
+            {SHOWCASE_QUESTIONS.map((item,itemIndex)=><div key={item.id} style={{textAlign:"center"}}>
+              <div style={{height:5,borderRadius:99,background:item.moduleColor,boxShadow:`0 0 10px ${item.moduleColor}77`,marginBottom:7}}/>
+              <span aria-hidden="true" style={{fontSize:18}}>{item.icon}</span>
+              <span className="sr-only">{`Checkpoint ${itemIndex+1}: ${item.module}`}</span>
+            </div>)}
+          </div>
+          <Btn onClick={start} color={C.teal} size="lg" style={{width:"100%"}}>COMEÇAR A ROTA ⚡</Btn>
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:14,alignItems:"center",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:15}}>
+        <div>
+          <div style={{color:C.white,fontWeight:900,fontSize:13,marginBottom:5}}>ABRA NO SEU CELULAR</div>
+          <p style={{color:C.grayLt,fontSize:12,lineHeight:1.5,margin:0}}>Aponte a câmera para experimentar a mesma rota. Nenhuma resposta é enviada ou armazenada.</p>
+          <button onClick={copyLink} style={{marginTop:8,background:"transparent",border:0,color:C.teal,textDecoration:"underline",fontWeight:800,fontSize:12,padding:0,minHeight:30}}>{copied?"✓ LINK COPIADO":"COPIAR LINK"}</button>
+        </div>
+        <div style={{background:"#fff",padding:7,borderRadius:10,lineHeight:0}} aria-label="QR Code para abrir o Modo Mostra">
+          <QRCodeSVG value={showcaseUrl} size={92} bgColor="#ffffff" fgColor="#07090f" level="M" title="Abrir Modo Mostra"/>
+        </div>
+      </div>
+      <Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR AO JOGO COMPLETO</Btn>
+    </div>
+  );
+
+  if(stage==="done")return(
+    <div style={{minHeight:"100vh",padding:"28px 16px",display:"flex",flexDirection:"column",justifyContent:"center",gap:18,animation:"popIn .45s ease"}}>
+      <div style={{textAlign:"center",background:`linear-gradient(150deg,${C.green}1a,${C.card},${C.teal}15)`,border:`2px solid ${C.green}55`,borderRadius:26,padding:"30px 20px",boxShadow:`0 0 70px ${C.green}18`}}>
+        <div style={{fontSize:58,marginBottom:8}}>🏁</div>
+        <Tag label="Rota concluída" color={C.green}/>
+        <div style={{fontFamily:"Impact,sans-serif",fontSize:32,letterSpacing:2,color:C.white,marginTop:14}}>VOCÊ VIU O PRODUTO EM AÇÃO</div>
+        <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:6,margin:"18px 0 8px"}}>
+          <span style={{fontFamily:"Impact,sans-serif",fontSize:56,color:C.green}}>{correctCount}</span>
+          <span style={{color:C.grayLt,fontWeight:800}}>de {SHOWCASE_QUESTIONS.length} decisões</span>
+        </div>
+        <p style={{color:C.grayLt,fontSize:13,lineHeight:1.6,margin:"0 auto",maxWidth:390}}>Este placar serve apenas à demonstração. O produto completo aprofunda hábitos, família, prevenção, alertas, consequências e ação segura.</p>
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.teal}44`,borderRadius:16,padding:16}}>
+        <div style={{color:C.teal,fontWeight:900,fontSize:13,marginBottom:7}}>O QUE ESTA ROTA MOSTROU</div>
+        <p style={{color:C.grayLt,fontSize:13,lineHeight:1.65,margin:0}}>Um produto educacional acessível, baseado em diretrizes e desenhado para conversar com adolescentes — sem diagnóstico, sem coleta de dados e sem substituir profissionais de saúde.</p>
+      </div>
+      <Btn onClick={start} color={C.green} size="lg" style={{width:"100%"}}>↻ PRÓXIMO VISITANTE</Btn>
+      <Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>CONHECER O JOGO COMPLETO</Btn>
+    </div>
+  );
+
+  const answered=selected!==null;
+  return(
+    <div style={{minHeight:"100vh",padding:"18px 16px 30px",display:"flex",flexDirection:"column",gap:16,animation:"slideIn .32s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <Tag label="Rota expressa" color={C.teal}/>
+        <span style={{marginLeft:"auto",color:C.grayLt,fontSize:12,fontWeight:800}}>{index+1}/{SHOWCASE_QUESTIONS.length}</span>
+      </div>
+      <ProgressBar value={index+1} max={SHOWCASE_QUESTIONS.length} color={question.moduleColor} label="Progresso da rota expressa" h={7}/>
+
+      <div style={{display:"flex",alignItems:"center",gap:14,background:`${question.moduleColor}10`,border:`1px solid ${question.moduleColor}44`,borderRadius:18,padding:15}}>
+        <ModuleArt mod={index+1} size={72} color={question.moduleColor}/>
+        <div>
+          <div style={{color:question.moduleColor,fontWeight:900,fontSize:11,letterSpacing:1.5}}>CHECKPOINT {index+1} · {question.module.toUpperCase()}</div>
+          <div style={{color:C.white,fontWeight:900,fontSize:17,marginTop:5}}>{["Hábitos","História familiar","Prevenção","Sinais de alerta","Consequências","Ação segura"][index]}</div>
+        </div>
+      </div>
+
+      <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:20,padding:18}}>
+        <p style={{color:C.white,fontSize:18,fontWeight:900,lineHeight:1.45,margin:"0 0 16px"}}>{question.q}</p>
+        <div style={{display:"flex",flexDirection:"column",gap:9}}>
+          {question.opts.map((option,optionIndex)=>{
+            const isSelected=selected===optionIndex;
+            const isCorrect=optionIndex===question.correct;
+            const stateColor=answered&&isCorrect?C.green:answered&&isSelected?C.red:question.moduleColor;
+            return <button key={option} onClick={()=>choose(optionIndex)} disabled={answered} aria-pressed={isSelected}
+              style={{width:"100%",display:"flex",alignItems:"center",gap:11,textAlign:"left",padding:"12px 13px",borderRadius:12,background:answered&&(isSelected||isCorrect)?`${stateColor}18`:C.surface,border:`2px solid ${answered&&(isSelected||isCorrect)?stateColor:C.border}`,color:C.white,fontSize:14,lineHeight:1.4,opacity:answered&&!isSelected&&!isCorrect?.62:1}}>
+              <span style={{display:"grid",placeItems:"center",width:28,height:28,borderRadius:8,flexShrink:0,background:`${stateColor}20`,border:`1px solid ${stateColor}88`,color:stateColor,fontWeight:900}}>{answered&&isCorrect?"✓":String.fromCharCode(65+optionIndex)}</span>
+              <span>{option}</span>
+            </button>;
+          })}
+        </div>
+      </div>
+
+      {answered&&<div role="status" aria-live="polite" style={{background:selected===question.correct?`${C.green}12`:`${C.yellow}10`,borderLeft:`4px solid ${selected===question.correct?C.green:C.yellow}`,borderRadius:"0 13px 13px 0",padding:"13px 14px",animation:"fadeUp .3s ease"}}>
+        <div style={{color:selected===question.correct?C.green:C.yellow,fontWeight:900,fontSize:13,marginBottom:5}}>{selected===question.correct?"BOA DECISÃO!":"VALE GUARDAR ESTA IDEIA"}</div>
+        <p style={{color:C.grayLt,fontSize:13,lineHeight:1.6,margin:0}}>{question.exp}</p>
+      </div>}
+      {answered&&<Btn onClick={next} color={question.moduleColor} size="lg" style={{width:"100%"}}>{index<SHOWCASE_QUESTIONS.length-1?"PRÓXIMO CHECKPOINT →":"CONCLUIR A ROTA 🏁"}</Btn>}
+    </div>
+  );
+}
+
 function QuizFinalIntro({finalQuiz,onStart}){
   return(
     <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:20,animation:"fadeUp .4s ease"}}>
@@ -3887,7 +4019,7 @@ function VictoryScreen({totalScore,quizAnswers,playerName,finalQuiz,onRestart,on
 // ORQUESTRADOR PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function PressaoQuest(){
-  const [screen,setScreen]=useState("home");
+  const [screen,setScreen]=useState(()=>new URLSearchParams(window.location.search).get("modo")==="mostra"?"showcase":"home");
   const [soundOn,setSoundOn]=useState(true);
   const [playerName,setPlayerName]=useState("Jogador");
   const [m1Answers,setM1Answers]=useState([]);
@@ -3922,10 +4054,10 @@ export default function PressaoQuest(){
     m4intro:"4",m4game:"4",m4result:"4",
     m5intro:"5",m5game:"5",m5result:"5",
     m6intro:"6",m6game:"6",
-    quizfinalintro:"quiz",quizfinal:"quiz",victory:"quiz",report:"report",
+    quizfinalintro:"quiz",quizfinal:"quiz",victory:"quiz",report:"report",showcase:"showcase",
   };
   const currentModule=screenModules[screen]||"1";
-  const currentModuleLabel={1:"Hábitos",2:"Família",3:"Prevenção",4:"Alertas",5:"Consequências",6:"Ação familiar",quiz:"Quiz final",report:"Relatório"}[currentModule]||"Pressão Quest";
+  const currentModuleLabel={1:"Hábitos",2:"Família",3:"Prevenção",4:"Alertas",5:"Consequências",6:"Ação familiar",quiz:"Quiz final",report:"Relatório",showcase:"Modo Mostra"}[currentModule]||"Pressão Quest";
 
   useEffect(()=>{SFX.setMuted(!soundOn);},[soundOn]);
   useEffect(()=>{
@@ -3965,6 +4097,12 @@ export default function PressaoQuest(){
   const prepareFinalQuiz=()=>setFinalQuiz(pickFinalQuiz());
   const finishM6=(sc,commitments)=>{SFX.unlock();setM6Score(sc);setM6Commitments(commitments);prepareFinalQuiz();setScreen("quizfinalintro");};
   const finishQuiz=(sc,ans)=>{setQuizScore(sc);setQuizAnswers(ans);setScreen("victory");};
+  const openShowcase=()=>{
+    const url=new URL(window.location.href);url.searchParams.set("modo","mostra");window.history.replaceState({},"",url);setScreen("showcase");
+  };
+  const closeShowcase=()=>{
+    const url=new URL(window.location.href);url.searchParams.delete("modo");window.history.replaceState({},"",url);setScreen("home");
+  };
 
   const restart=()=>{
     setScreen("home");setPlayerName("Jogador");setM1Answers([]);setM1Score(0);setM1Risk(0);
@@ -4000,7 +4138,7 @@ export default function PressaoQuest(){
   const currentMemberDef=FAM_DEFS.find(f=>f.id===detailQueue[detailIdx]);
   const currentMember=members.find(m=>m.id===detailQueue[detailIdx]);
 
-  const moduleColorMap={"1":C.red,"2":C.amber,"3":C.green,"4":C.red,"5":C.orange,"6":C.teal,quiz:C.purple,report:C.teal};
+  const moduleColorMap={"1":C.red,"2":C.amber,"3":C.green,"4":C.red,"5":C.orange,"6":C.teal,quiz:C.purple,report:C.teal,showcase:C.teal};
   const moduleColor=moduleColorMap[currentModule]||C.red;
 
   return(
@@ -4011,11 +4149,12 @@ export default function PressaoQuest(){
       <ModuleAura color={moduleColor} label={currentModuleLabel}/>
       <SoundToggle on={soundOn} onToggle={()=>setSoundOn(v=>!v)}/>
 
-      {screen!=="home"&&screen!=="devpanel"&&<TopBar module={currentModule} score={totalScore} onBack={screen==="report"?()=>setScreen("victory"):undefined}/>}
+      {screen!=="home"&&screen!=="devpanel"&&screen!=="showcase"&&<TopBar module={currentModule} score={totalScore} onBack={screen==="report"?()=>setScreen("victory"):undefined}/>}
 
       <main id="main-content" ref={mainRef} tabIndex={-1} key={screen} aria-labelledby="screen-title" style={{width:"100%",maxWidth:560,margin:"0 auto",position:"relative",zIndex:1,animation:"screenEnter .32s cubic-bezier(.4,0,.2,1)"}}>
         <h1 id="screen-title" className="sr-only">Desafio Hipertensão — {currentModuleLabel}</h1>
-        {screen==="home"&&<M1Home onStart={()=>setScreen("name")} playerName={playerName} onDevUnlock={()=>setScreen("devpanel")}/>}
+        {screen==="home"&&<M1Home onStart={()=>setScreen("name")} onShowcase={openShowcase} playerName={playerName} onDevUnlock={()=>setScreen("devpanel")}/>}
+        {screen==="showcase"&&<ShowcaseMode onExit={closeShowcase}/>}
         {screen==="devpanel"&&<DevPanel onJump={devJumpTo} onClose={()=>setScreen("home")}/>}
         {screen==="name"&&<M1Name onConfirm={n=>{setPlayerName(n);setScreen("m1quiz");}}/>}
         {screen==="m1quiz"&&<M1Quiz onFinish={finishM1}/>}

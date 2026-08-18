@@ -5,6 +5,7 @@ import {
   M5_SCENARIOS_BANK,
   PREVENTION_CHALLENGES,
   QUIZ_QUESTIONS_BANK,
+  SHOWCASE_QUESTIONS,
 } from "../pressao-quest-completo.jsx";
 
 function expectUniqueIds(items){
@@ -51,5 +52,13 @@ describe("integridade dos bancos de conteúdo",()=>{
       expect(question.correct).toBeLessThan(question.opts.length);
       expect(question.exp.length).toBeGreaterThan(15);
     });
+  });
+
+  it("mantém uma rota expressa com um checkpoint válido por módulo",()=>{
+    expect(SHOWCASE_QUESTIONS).toHaveLength(6);
+    expect(SHOWCASE_QUESTIONS.map(question=>question.module)).toEqual([
+      "Módulo 1","Módulo 2","Módulo 3","Módulo 4","Módulo 5","Módulo 6",
+    ]);
+    expectUniqueIds(SHOWCASE_QUESTIONS);
   });
 });

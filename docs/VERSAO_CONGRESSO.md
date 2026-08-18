@@ -1,11 +1,11 @@
-# Versão Congresso — 1.1.0 — agosto de 2026
+# Versão Congresso — 1.2.0 — agosto de 2026
 
 Documento corrente da versão preparada para demonstração acadêmica. Relatórios anteriores em `docs/` permanecem como histórico e não substituem este estado.
 
 ## Estado verificado
 
 - build de produção concluído com Vite 8;
-- onze testes automatizados aprovados;
+- doze testes automatizados aprovados;
 - `npm audit` sem vulnerabilidades conhecidas na árvore instalada;
 - Three.js carregado sob demanda, fora do pacote inicial;
 - relatório A4 em preto e branco, com folha timbrada e aviso educacional em todas as páginas;
@@ -13,6 +13,7 @@ Documento corrente da versão preparada para demonstração acadêmica. Relatór
 - fallback estático para ausência de WebGL e tratamento global de erro;
 - pontuação do Módulo 3 integrada com denominador real e teste de regressão;
 - CI configurada para testar, compilar e auditar cada push e pull request.
+- Modo Mostra com rota expressa, QR Code, acesso direto e reinício entre visitantes.
 
 ## Lighthouse de produção
 

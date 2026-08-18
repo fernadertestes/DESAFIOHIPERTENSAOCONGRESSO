@@ -27,6 +27,8 @@ O percurso possui seis módulos e um quiz final:
 6. **Como Ajudar** — treina decisões seguras em situações simuladas.
 7. **Quiz final** — revisão dos principais conceitos trabalhados.
 
+Para demonstrações públicas, o **Modo Mostra** oferece uma rota expressa de aproximadamente três minutos: um checkpoint por módulo, sem nome, histórico familiar ou relatório pessoal. Ele pode ser aberto pelo botão da capa ou diretamente com `?modo=mostra` no final da URL.
+
 Ao concluir o percurso, o participante pode imprimir ou salvar o relatório de aprendizagem em PDF. A versão de impressão usa formato A4, preto e branco, folha timbrada do Desafio Hipertensão, identificação do participante, data de emissão e quebras de página preparadas para preservar a leitura dos cartões.
 
 ## Nota metodológica importante
@@ -108,7 +110,7 @@ Nesta versão não há conta, backend, analytics ou persistência: as respostas 
 
 Revisão científica: **agosto de 2026**.
 
-Consulte a [`versão atual`](docs/VERSAO_ATUAL.md), a [`matriz de evidências`](docs/MATRIZ_EVIDENCIAS.md) e o [`plano de validação`](docs/VALIDACAO_METODOLOGICA.md). Os demais relatórios em `docs/` são registros históricos e podem descrever estados anteriores do código.
+Consulte a [`versão atual`](docs/VERSAO_ATUAL.md), o [`guia do Modo Mostra`](docs/MODO_MOSTRA.md), a [`matriz de evidências`](docs/MATRIZ_EVIDENCIAS.md) e o [`plano de validação`](docs/VALIDACAO_METODOLOGICA.md). Os demais relatórios em `docs/` são registros históricos e podem descrever estados anteriores do código.
 
 ## Estado atual da revisão
 

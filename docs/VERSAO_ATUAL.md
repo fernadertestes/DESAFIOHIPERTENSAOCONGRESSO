@@ -1,6 +1,6 @@
 # Desafio Hipertensão — especificação atual
 
-**Versão:** 1.1.0
+**Versão:** 1.2.0
 
 **Data da revisão:** 18 de agosto de 2026
 
@@ -27,6 +27,8 @@ A aleatoriedade amplia variedade e rejogabilidade, mas impede comparação diret
 ## Dados e privacidade
 
 Não há backend, conta, analytics ou armazenamento persistente. As respostas permanecem na memória do navegador durante a partida. O PDF é produzido pelo próprio navegador e pode conter informações pessoais; a guarda fica sob controle do participante.
+
+O Modo Mostra é ainda mais restritivo: não solicita nome, hábitos ou histórico familiar e não gera relatório individual. As seis respostas existem apenas durante a rota expressa e são apagadas ao reiniciar ou fechar a página.
 
 ## Limitações conhecidas
 
