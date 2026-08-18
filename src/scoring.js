@@ -55,15 +55,26 @@ export function calculatePreventionPerformance(responses) {
   return { earned, maximum, percent: toPercent(earned, maximum) };
 }
 
-export function calculateLearningScore({ habits, quiz, prevention, alerts, decisions, action }) {
-  return Math.round(
-    habits * 0.25 +
-    quiz * 0.20 +
-    prevention * 0.20 +
-    alerts * 0.15 +
-    decisions * 0.10 +
-    action * 0.10
-  );
+// Mantém o contrato entre o jogo do M3 e o relatório em um único ponto testável.
+export function createPreventionSubmission(result = {}) {
+  return {
+    text: result.text || "",
+    found: result.found || [],
+    bonus: result.bonus || [],
+    newAllies: result.newAllies || [],
+    total: result.total || 0,
+    maxPoints: result.maxPoints || 0,
+    correctCount: result.correctCount || 0,
+    hit: Boolean(result.hit),
+  };
+}
+
+// Índice simples de gamificação, não validado. Hábitos autorreferidos e plano de
+// ação ficam fora da média para não transformar contexto pessoal em desempenho.
+export function calculateLearningScore({ quiz, prevention, alerts, decisions }) {
+  const domains = [quiz, prevention, alerts, decisions].filter(Number.isFinite);
+  if (!domains.length) return 0;
+  return Math.round(domains.reduce((sum, value) => sum + value, 0) / domains.length);
 }
 
 export function calculateScenarioProgress(scenarios, scenarioIndex, stepIndex, phase) {

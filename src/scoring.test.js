@@ -9,6 +9,7 @@ import {
   calculateLearningScore,
   calculatePreventionPerformance,
   calculateScenarioProgress,
+  createPreventionSubmission,
   toPercent,
 } from "./scoring.js";
 
@@ -44,15 +45,34 @@ describe("pontuação educativa", () => {
     expect(calculatePreventionPerformance([{ total: 20, maxPoints: 40 }]).percent).toBe(50);
   });
 
+  it("preserva os dados necessários ao enviar o resultado real do módulo 3", () => {
+    expect(createPreventionSubmission({
+      text: "Plano",
+      total: 35,
+      maxPoints: 50,
+      correctCount: 3,
+      hit: true,
+    })).toMatchObject({ total: 35, maxPoints: 50, correctCount: 3, hit: true });
+  });
+
   it("leva um percurso perfeito a 100% no relatório", () => {
     expect(calculateLearningScore({
-      habits: 100,
       quiz: 100,
       prevention: 100,
       alerts: 100,
       decisions: 100,
-      action: 100,
     })).toBe(100);
+  });
+
+  it("usa média simples e ignora hábitos autorreferidos e compromissos", () => {
+    expect(calculateLearningScore({
+      habits: 0,
+      quiz: 100,
+      prevention: 80,
+      alerts: 60,
+      decisions: 40,
+      action: 0,
+    })).toBe(70);
   });
 
   it("calcula o progresso dos casos pela quantidade real de etapas", () => {

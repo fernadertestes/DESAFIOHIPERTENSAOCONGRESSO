@@ -1,0 +1,10 @@
+# Desafio Hipertensão
+
+> Protótipo digital gamificado para educação em saúde cardiovascular de adolescentes.
+
+O conteúdo é educativo e baseado em diretrizes selecionadas. Pontos e índices são elementos experimentais de gamificação: não são escores clínicos ou instrumentos validados, não fazem diagnóstico e não orientam tratamento.
+
+## Documentação
+
+- [Visão geral](https://github.com/fernadertestes/DESAFIOHIPERTENSAOCONGRESSO)
+- [Diretriz Brasileira de Hipertensão 2025](https://abccardiol.org/article/diretriz-brasileira-de-hipertensao-arterial-2025/)

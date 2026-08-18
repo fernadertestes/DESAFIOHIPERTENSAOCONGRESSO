@@ -27,9 +27,13 @@ O percurso possui seis módulos e um quiz final:
 6. **Como Ajudar** — treina decisões seguras em situações simuladas.
 7. **Quiz final** — revisão dos principais conceitos trabalhados.
 
+Para demonstrações públicas, o **Modo Mostra** oferece uma rota expressa de aproximadamente três minutos: um checkpoint por módulo, sem nome, histórico familiar ou relatório pessoal. Ele pode ser aberto pelo botão da capa ou diretamente com `?modo=mostra` no final da URL.
+
+Ao concluir o percurso, o participante pode imprimir ou salvar o relatório de aprendizagem em PDF. A versão de impressão usa formato A4, preto e branco, folha timbrada do Desafio Hipertensão, identificação do participante, data de emissão e quebras de página preparadas para preservar a leitura dos cartões.
+
 ## Nota metodológica importante
 
-**Pontos, rankings e índices exibidos no Desafio Hipertensão são elementos de gamificação.** Eles não correspondem a escores clínicos validados, não calculam a probabilidade individual de hipertensão ou de eventos cardiovasculares, não fazem diagnóstico e não orientam tratamento.
+**Pontos, rankings e índices exibidos no Desafio Hipertensão são elementos experimentais de gamificação.** O índice do jogo é uma média simples das atividades de conhecimento e decisão; hábitos autorreferidos, mapa familiar e compromissos não entram nessa média. Nada disso corresponde a escore clínico ou instrumento educacional validado, calcula probabilidade individual, faz diagnóstico ou orienta tratamento.
 
 O jogo é uma ferramenta educativa e não substitui aferição adequada da pressão arterial, avaliação profissional ou atendimento médico.
 
@@ -47,13 +51,13 @@ A lista comentada está em [`docs/REFERENCIAS_CIENTIFICAS.md`](docs/REFERENCIAS_
 ## Tecnologias
 
 - React 18
-- Vite 5
+- Vite 8
 - Three.js
 - JavaScript / JSX
 
 ## Executar localmente
 
-Requer Node.js 18 ou superior.
+Requer Node.js 22 ou superior.
 
 ```bash
 npm install
@@ -71,6 +75,13 @@ Para executar os testes das regras de pontuação:
 
 ```bash
 npm test
+```
+
+Para executar testes e build local:
+
+```bash
+npm run check
+npm audit
 ```
 
 ## Estrutura do projeto
@@ -91,13 +102,15 @@ As imagens de interface são distribuídas em WebP para reduzir o tamanho de car
 
 ## Uso responsável
 
-O conteúdo foi escrito em linguagem acessível para adolescentes. Situações clínicas são simulações educativas. Em uma emergência real no Brasil, o jogador é orientado a buscar ajuda e acionar o **SAMU 192** quando indicado.
+O conteúdo foi escrito em linguagem acessível para adolescentes. Situações clínicas são simulações educativas. Em uma emergência real, o jogador é orientado a buscar ajuda e acionar o **SAMU 192** nas áreas cobertas, ou seguir o fluxo de emergência disponível no município.
+
+Nesta versão não há conta, backend, analytics ou persistência: as respostas permanecem somente na memória do navegador e são apagadas ao atualizar ou fechar a página. O PDF pode conter apelido, hábitos e informações familiares e deve ser armazenado e compartilhado com cuidado.
 
 ## Estado da revisão
 
 Revisão científica: **agosto de 2026**.
 
-Consulte [`docs/REVISAO_CIENTIFICA_2.md`](docs/REVISAO_CIENTIFICA_2.md) para o histórico das principais correções.
+Consulte a [`versão atual`](docs/VERSAO_ATUAL.md), o [`guia do Modo Mostra`](docs/MODO_MOSTRA.md), a [`matriz de evidências`](docs/MATRIZ_EVIDENCIAS.md) e o [`plano de validação`](docs/VALIDACAO_METODOLOGICA.md). Os demais relatórios em `docs/` são registros históricos e podem descrever estados anteriores do código.
 
 ## Estado atual da revisão
 

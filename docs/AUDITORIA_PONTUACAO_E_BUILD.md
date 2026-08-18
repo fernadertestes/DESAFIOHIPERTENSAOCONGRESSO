@@ -1,5 +1,7 @@
 # Auditoria de pontuação, coerência e build
 
+> **Registro histórico.** Os números de build e dependências abaixo descrevem uma versão anterior. Para o estado 1.1.0 verificado, consulte `VERSAO_CONGRESSO.md` e `VERSAO_ATUAL.md`.
+
 Data: 17/08/2026
 
 ## Escopo

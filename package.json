@@ -1,22 +1,25 @@
 {
   "name": "desafio-hipertensao",
-  "version": "1.0.0",
+  "version": "1.2.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check": "npm test && npm run build"
   },
   "dependencies": {
+    "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.184.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.10",
-    "vitest": "^2.1.9"
+    "@vitejs/plugin-react": "^6.0.5",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   },
   "description": "Jogo educativo sobre hipertensão arterial voltado a adolescentes",
   "optionalDependencies": {
