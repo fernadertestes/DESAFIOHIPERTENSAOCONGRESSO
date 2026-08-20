@@ -6,7 +6,7 @@ O Desafio Hipertensão integra a Mostra de Produtos Educacionais de 21/08/2026, 
 
 ## Acesso
 
-- botão `VERSÃO CONGRESSO · 12 QUESTÕES` na tela inicial;
+- botão `VERSÃO CONGRESSO` na tela inicial;
 - acesso direto acrescentando `?modo=congresso` à URL publicada;
 - compatibilidade com o endereço anterior `?modo=mostra`;
 - QR Code gerado no próprio navegador para o endereço da rota;
@@ -14,20 +14,20 @@ O Desafio Hipertensão integra a Mostra de Produtos Educacionais de 21/08/2026, 
 
 ## Experiência
 
-A rota solicita um apelido e apresenta duas perguntas de cada módulo:
+A rota solicita um apelido e apresenta uma prévia reduzida das mecânicas originais:
 
-1. hábitos e aferição adequada;
-2. história familiar sem determinismo;
-3. prevenção por atividade física;
-4. reconhecimento de sinais de alarme;
-5. consequências em órgãos-alvo;
-6. busca segura de ajuda.
+1. Módulo 1: duas perguntas sorteadas do radar de hábitos original;
+2. Módulo 2: escolha e mapeamento de um membro da família;
+3. Módulo 3: um caso sorteado do construtor de planos de prevenção;
+4. Módulo 4: quatro dos dezesseis sintomas, com escolha de um único sinal de alarme;
+5. Módulo 5: um caso sorteado, com suas duas decisões;
+6. Módulo 6: duas perguntas sobre busca segura de ajuda.
 
-O tempo esperado é de cinco a oito minutos. Ao final, o participante recebe um relatório individual com resultado geral, desempenho por módulo e revisão das doze decisões. O relatório pode ser impresso ou salvo em PDF, em preto e branco e com folha timbrada.
+O tempo esperado é de oito a doze minutos. Ao final, o participante recebe um relatório individual que distingue conhecimento, participação no mapa familiar, plano preventivo, reconhecimento de alerta e decisões seguras. O relatório pode ser impresso ou salvo em PDF, em preto e branco e com folha timbrada.
 
 ## Privacidade
 
-O modo solicita somente um apelido, com orientação para não informar o nome completo. Não solicita idade, hábitos, peso, histórico familiar ou compromisso pessoal e não envia dados. Apelido e respostas ficam em memória apenas até o reinício ou fechamento da página. O arquivo PDF só é criado quando o participante usa a impressão do navegador.
+O modo solicita um apelido, com orientação para não informar o nome completo. No Módulo 2, o participante pode registrar idade aproximada e antecedentes de um familiar; deve informar somente o que souber e quiser compartilhar. Nada é enviado ou armazenado. Os dados ficam em memória até o reinício ou fechamento da página. O arquivo PDF só é criado quando o participante usa a impressão do navegador.
 
 ## Checklist da mesa
 

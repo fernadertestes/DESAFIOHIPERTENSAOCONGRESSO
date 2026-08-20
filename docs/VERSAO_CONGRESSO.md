@@ -1,4 +1,4 @@
-# Versão Congresso — 1.3.0 — agosto de 2026
+# Versão Congresso — 1.4.0 — agosto de 2026
 
 Documento corrente da versão preparada para demonstração acadêmica. Relatórios anteriores em `docs/` permanecem como histórico e não substituem este estado.
 
@@ -13,7 +13,7 @@ Documento corrente da versão preparada para demonstração acadêmica. Relatór
 - fallback estático para ausência de WebGL e tratamento global de erro;
 - pontuação do Módulo 3 integrada com denominador real e teste de regressão;
 - CI configurada para testar, compilar e auditar cada push e pull request.
-- Versão Congresso com apelido, duas perguntas por módulo, QR Code, relatório individual em PDF e reinício entre visitantes.
+- Versão Congresso como prévia fiel das seis mecânicas: M1 com duas perguntas sorteadas do radar de hábitos original; M2 com um familiar; M3 com um caso; M4 com quatro sintomas e um correto; M5 com um caso de duas decisões; M6 com duas perguntas; relatório individual em PDF e reinício entre visitantes.
 
 ## Lighthouse de produção
 
@@ -23,7 +23,8 @@ Medição local da Versão Congresso em Chrome headless, viewport móvel, em 19/
 - acessibilidade: 100/100;
 - boas práticas: 100/100;
 - SEO: 100/100;
-- FCP: 1,4 s; LCP: 2,0 s; TBT: 10 ms; CLS: 0;
+- FCP: 1,4 s; LCP: 2,0 s; TBT: 20 ms; CLS: 0;
+- carregamento inicial da prévia: 188 KiB; o fundo 3D permanece disponível no jogo completo e não é baixado no modo congresso.
 - nenhum erro de console.
 
 Resultados automatizados não substituem teste manual com teclado, VoiceOver/NVDA e adolescentes reais.

@@ -25,7 +25,7 @@ const C = {
   navy:"#60a5fa",white:"#f0f4ff",gray:"#a7b3c6",grayDk:"#8d9bb0",grayLt:"#cbd5e1",
 };
 
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.4.0";
 
 const MODULE_ART = {
   1: "/modules/m1-quiz-risco.webp",
@@ -330,18 +330,18 @@ export const QUIZ_QUESTIONS_BANK = [
 // Sorteia array sem mutar o original
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-// Seleciona 10 perguntas equilibradas (1 por categoria; se >10 cats, sorteia quais entram)
-function pickQuizQuestions(){
+// Seleciona perguntas equilibradas entre as categorias do radar de hábitos.
+function pickQuizQuestions(count=10){
   const byCat={};
   QUIZ_QUESTIONS_BANK.forEach(q=>{if(!byCat[q.cat])byCat[q.cat]=[];byCat[q.cat].push(q);});
   const cats=shuffle(Object.keys(byCat));
   const picked=[];
   cats.forEach(cat=>{const pool=shuffle(byCat[cat]);picked.push(pool[0]);});
-  if(picked.length<10){
+  if(picked.length<count){
     const rest=shuffle(QUIZ_QUESTIONS_BANK.filter(q=>!picked.includes(q)));
-    while(picked.length<10&&rest.length)picked.push(rest.shift());
+    while(picked.length<count&&rest.length)picked.push(rest.shift());
   }
-  return shuffle(picked).slice(0,10);
+  return shuffle(picked).slice(0,count);
 }
 
 const RISK_PROFILES=[
@@ -981,7 +981,7 @@ function M1Home({onStart,onShowcase,playerName,onDevUnlock}){
           </div>
           <Tag label="6 Módulos · Game educativo" color={C.red}/>
           <Btn onClick={onStart} color={C.red} size="lg" style={{width:"100%",maxWidth:320,boxShadow:`0 0 28px ${C.red}66`}}>INICIAR QUEST ▶</Btn>
-          <Btn onClick={onShowcase} color={C.teal} outline size="lg" style={{width:"100%",maxWidth:320,background:`${C.bg}bb`,backdropFilter:"blur(10px)"}}>🎓 VERSÃO CONGRESSO · 12 QUESTÕES</Btn>
+          <Btn onClick={onShowcase} color={C.teal} outline size="lg" style={{width:"100%",maxWidth:320,background:`${C.bg}bb`,backdropFilter:"blur(10px)"}}>🎓 VERSÃO CONGRESSO · PRÉVIA DOS 6 MÓDULOS</Btn>
         </div>
 
         {showDevModal&&(
@@ -1130,9 +1130,9 @@ function M1Name({onConfirm}){
   );
 }
 
-function M1Quiz({onFinish}){
-  const [selected]=useState(()=>pickQuizQuestions());
-  const [qi,setQi]=useState(0);const [answers,setAnswers]=useState(Array(10).fill(null));const [sel,setSel]=useState(null);
+function M1Quiz({onFinish,questionCount=10}){
+  const [selected]=useState(()=>pickQuizQuestions(questionCount));
+  const [qi,setQi]=useState(0);const [answers,setAnswers]=useState(Array(questionCount).fill(null));const [sel,setSel]=useState(null);
   const [locked,setLocked]=useState(false);
   const lockedRef=useRef(false);
   const advanceTimerRef=useRef(null);
@@ -1299,7 +1299,7 @@ function M2Selector({members,onEdit,onFinish}){
   );
 }
 
-function M2Detail({member,memberDef,onSave,onBack}){
+function M2Detail({member,memberDef,onSave,onBack,saveLabel="💾 SALVAR E VOLTAR À LISTA"}){
   const [factors,setFactors]=useState(member.factors||[]);
   const [age,setAge]=useState(member.age||"");
   const [deceased,setDeceased]=useState(member.deceased||false);
@@ -1360,7 +1360,7 @@ function M2Detail({member,memberDef,onSave,onBack}){
         </div>
       ))}
       <Btn onClick={()=>onSave({...member,factors,age:age?parseInt(age):null,deceased,visited:true})} color={factors.length>=2?C.orange:C.green} size="lg" style={{width:"100%",color:"#000"}}>
-        💾 SALVAR E VOLTAR À LISTA
+        {saveLabel}
       </Btn>
     </div>
   );
@@ -2515,14 +2515,15 @@ function M5Intro({onStart}){
   );
 }
 
-function M5Game({onFinish}){
-  const [scenarios]=useState(()=>shuffle([...M5_SCENARIOS_BANK]).slice(0,4));
+function M5Game({onFinish,scenarioCount=4}){
+  const [scenarios]=useState(()=>shuffle([...M5_SCENARIOS_BANK]).slice(0,scenarioCount));
   const [scenIdx,setScenIdx]=useState(0);
   const [stepIdx,setStepIdx]=useState(0);
   const [totalDmg,setTotalDmg]=useState(0);
   const [sel,setSel]=useState(null);
   const [showFb,setShowFb]=useState(false);
   const [phase,setPhase]=useState("intro");
+  const [decisions,setDecisions]=useState([]);
   const sc=scenarios[scenIdx];
   const step=sc?.steps[stepIdx];
   const progress=calculateScenarioProgress(scenarios,scenIdx,stepIdx,phase);
@@ -2533,6 +2534,7 @@ function M5Game({onFinish}){
     if(choice.ok)SFX.correct();else SFX.wrong();
     setSel(ci);setShowFb(true);
     setTotalDmg(d=>d+choice.dmg);
+    setDecisions(previous=>[...previous,{scenarioId:sc.id,scenarioTitle:sc.title,step:step.sit,choice:choice.t,ok:choice.ok,feedback:choice.fb}]);
   };
   const advance=()=>{
     if(stepIdx<sc.steps.length-1){setStepIdx(i=>i+1);setSel(null);setShowFb(false);}
@@ -2540,7 +2542,7 @@ function M5Game({onFinish}){
   };
   const nextScen=()=>{
     if(scenIdx<scenarios.length-1){setScenIdx(i=>i+1);setStepIdx(0);setSel(null);setShowFb(false);setPhase("intro");}
-    else onFinish(calculateDecisionScore(totalDmg),totalDmg);
+    else onFinish(calculateDecisionScore(totalDmg),totalDmg,decisions);
   };
 
   return(
@@ -3074,163 +3076,123 @@ function pickFinalQuiz(){
   return out;
 }
 
-export const CONGRESS_QUESTION_IDS=["m1b","m1h","m2h","m2k","m3b","m3j","m4a","m4l","m5d","m5i","m6a","m6b"];
-export const CONGRESS_QUESTIONS=CONGRESS_QUESTION_IDS.map(id=>FINAL_QUIZ_BANK.find(question=>question.id===id)).filter(Boolean);
+export const CONGRESS_PREVIEW_CONFIG={m1Questions:2,familyMembers:1,preventionCases:1,symptomOptions:Math.ceil(M4_SYMPTOMS.length/4),correctSymptoms:1,m5Scenarios:1,m5Questions:2,m6QuestionIds:["m6a","m6b"]};
+export const CONGRESS_M6_QUESTIONS=CONGRESS_PREVIEW_CONFIG.m6QuestionIds.map(id=>FINAL_QUIZ_BANK.find(question=>question.id===id)).filter(Boolean);
 
-function CongressMode({onExit}){
-  const [stage,setStage]=useState("intro");
-  const [nickname,setNickname]=useState("");
-  const [index,setIndex]=useState(0);
+export function pickCongressSymptoms(){
+  const correct=shuffle(M4_SYMPTOMS.filter(symptom=>symptom.real)).slice(0,1);
+  const distractors=shuffle(M4_SYMPTOMS.filter(symptom=>!symptom.real)).slice(0,CONGRESS_PREVIEW_CONFIG.symptomOptions-1);
+  return shuffle([...correct,...distractors]);
+}
+
+function CongressKnowledgeStage({moduleNumber,questions,onComplete}){
+  const [questionIndex,setQuestionIndex]=useState(0);
   const [selected,setSelected]=useState(null);
   const [answers,setAnswers]=useState([]);
-  const [copied,setCopied]=useState(false);
-  const question=CONGRESS_QUESTIONS[index];
-  const correctCount=answers.filter(answer=>answer.correct).length;
-  const congressUrl=typeof window!=="undefined"?`${window.location.origin}${window.location.pathname}?modo=congresso`:"";
-  const participant=nickname.trim()||"Participante";
-  const reportDate=new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date());
-  const moduleStats=[1,2,3,4,5,6].map(moduleNumber=>{
-    const moduleName=`Módulo ${moduleNumber}`;
-    const questions=CONGRESS_QUESTIONS.filter(item=>item.module===moduleName);
-    const moduleAnswers=answers.filter(answer=>questions.some(item=>item.id===answer.id));
-    return{moduleNumber,moduleName,questions,correct:moduleAnswers.filter(answer=>answer.correct).length,total:questions.length,color:questions[0]?.moduleColor||C.teal};
-  });
-
-  const start=()=>{if(!nickname.trim())return;setStage("playing");setIndex(0);setSelected(null);setAnswers([]);SFX.unlock();};
-  const resetVisitor=()=>{setStage("intro");setNickname("");setIndex(0);setSelected(null);setAnswers([]);setCopied(false);};
+  const question=questions[questionIndex];
+  const answered=selected!==null;
   const choose=optionIndex=>{
-    if(selected!==null)return;
-    setSelected(optionIndex);
+    if(answered)return;
     const correct=optionIndex===question.correct;
+    setSelected(optionIndex);
     setAnswers(previous=>[...previous,{id:question.id,selected:optionIndex,correct}]);
     correct?SFX.correct():SFX.wrong();
   };
   const next=()=>{
-    if(index<CONGRESS_QUESTIONS.length-1){setIndex(value=>value+1);setSelected(null);SFX.click();}
-    else{setStage("report");SFX.unlock();}
+    if(questionIndex<questions.length-1){setQuestionIndex(value=>value+1);setSelected(null);}
+    else onComplete(answers);
   };
-  const copyLink=async()=>{
-    try{await navigator.clipboard.writeText(congressUrl);setCopied(true);setTimeout(()=>setCopied(false),1800);}
-    catch{setCopied(false);}
-  };
+  return <div style={{minHeight:"100vh",padding:"18px 16px 30px",display:"flex",flexDirection:"column",gap:15,animation:"slideIn .32s ease"}}>
+    <div style={{display:"flex",alignItems:"center",gap:10}}><Tag label={`Módulo ${moduleNumber}`} color={question.moduleColor}/><span style={{marginLeft:"auto",color:C.grayLt,fontSize:12,fontWeight:800}}>{questionIndex+1}/{questions.length}</span></div>
+    <ProgressBar value={questionIndex+1} max={questions.length} color={question.moduleColor} label={`Progresso do módulo ${moduleNumber}`}/>
+    <div style={{display:"flex",alignItems:"center",gap:14,background:`${question.moduleColor}10`,border:`1px solid ${question.moduleColor}44`,borderRadius:18,padding:15}}><ModuleArt mod={moduleNumber} size={76} color={question.moduleColor}/><div><div style={{color:question.moduleColor,fontWeight:900,fontSize:11,letterSpacing:1.5}}>PRÉVIA DO JOGO COMPLETO</div><div style={{color:C.white,fontWeight:900,fontSize:19,marginTop:5}}>{moduleNumber===1?"PRESSÃO QUEST":"COMO AJUDAR"}</div></div></div>
+    <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:20,padding:18}}><p style={{color:C.white,fontSize:18,fontWeight:900,lineHeight:1.45,margin:"0 0 16px"}}>{question.q}</p><div style={{display:"flex",flexDirection:"column",gap:9}}>{question.opts.map((option,optionIndex)=>{const isSelected=selected===optionIndex;const isCorrect=optionIndex===question.correct;const stateColor=answered&&isCorrect?C.green:answered&&isSelected?C.red:question.moduleColor;return <button key={option} onClick={()=>choose(optionIndex)} disabled={answered} aria-pressed={isSelected} style={{width:"100%",display:"flex",alignItems:"center",gap:11,textAlign:"left",padding:"12px 13px",borderRadius:12,background:answered&&(isSelected||isCorrect)?`${stateColor}18`:C.surface,border:`2px solid ${answered&&(isSelected||isCorrect)?stateColor:C.border}`,color:C.white,fontSize:14,lineHeight:1.4,opacity:answered&&!isSelected&&!isCorrect?.62:1}}><span style={{display:"grid",placeItems:"center",width:28,height:28,borderRadius:8,flexShrink:0,background:`${stateColor}20`,border:`1px solid ${stateColor}88`,color:stateColor,fontWeight:900}}>{answered&&isCorrect?"✓":String.fromCharCode(65+optionIndex)}</span><span>{option}</span></button>;})}</div></div>
+    {answered&&<div role="status" aria-live="polite" style={{background:selected===question.correct?`${C.green}12`:`${C.yellow}10`,borderLeft:`4px solid ${selected===question.correct?C.green:C.yellow}`,borderRadius:"0 13px 13px 0",padding:"13px 14px",animation:"fadeUp .3s ease"}}><div style={{color:selected===question.correct?C.green:C.yellow,fontWeight:900,fontSize:13,marginBottom:5}}>{selected===question.correct?"BOA DECISÃO!":"VALE REVISAR"}</div><p style={{color:C.grayLt,fontSize:13,lineHeight:1.6,margin:0}}>{question.exp}</p></div>}
+    {answered&&<Btn onClick={next} color={question.moduleColor} size="lg" style={{width:"100%"}}>{questionIndex<questions.length-1?"PRÓXIMA PERGUNTA →":moduleNumber===1?"MÓDULO 2 — MISSÃO FAMÍLIA →":"GERAR RELATÓRIO 📄"}</Btn>}
+  </div>;
+}
 
-  if(stage==="intro")return(
-    <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",gap:18,justifyContent:"center",animation:"fadeUp .4s ease"}}>
-      <div style={{position:"relative",overflow:"hidden",background:`linear-gradient(155deg,${C.teal}1f,${C.card} 45%,${C.red}16)`,border:`1px solid ${C.teal}66`,borderRadius:26,padding:"26px 20px",boxShadow:`0 0 70px ${C.teal}18`}}>
-        <div aria-hidden="true" style={{position:"absolute",right:-45,top:-45,width:160,height:160,borderRadius:"50%",border:`28px solid ${C.teal}12`}}/>
-        <div style={{position:"relative"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:18}}>
-            <Tag label="Mostra de Produtos · 2026" color={C.teal}/>
-            <span style={{color:C.grayLt,fontSize:12,fontWeight:800}}>≈ 6 MIN</span>
-          </div>
-          <div style={{fontFamily:"Impact,sans-serif",fontSize:38,lineHeight:.95,letterSpacing:2,color:C.white}}>ROTA EXPRESSA</div>
-          <div style={{fontFamily:"Impact,sans-serif",fontSize:22,lineHeight:1.1,letterSpacing:3,color:C.teal,marginTop:7}}>DESAFIO HIPERTENSÃO</div>
-          <p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 16px"}}>Responda a duas perguntas de cada módulo e receba seu relatório individual de aprendizagem.</p>
-          <label htmlFor="congress-nickname" style={{display:"block",color:C.white,fontSize:12,fontWeight:900,letterSpacing:1,marginBottom:7}}>SUA CREDENCIAL: APELIDO</label>
-          <input id="congress-nickname" value={nickname} onChange={event=>setNickname(event.target.value.slice(0,24))} onKeyDown={event=>{if(event.key==="Enter")start();}} autoComplete="off" maxLength={24} placeholder="Como quer aparecer no relatório?" style={{width:"100%",boxSizing:"border-box",background:C.bg,border:`2px solid ${nickname.trim()?C.teal:C.borderHi}`,borderRadius:12,padding:"11px 13px",color:C.white,fontSize:15,marginBottom:6}}/>
-          <p style={{color:C.gray,fontSize:11,lineHeight:1.45,margin:"0 0 18px"}}>Use apenas um apelido. Não informe nome completo ou outro dado pessoal.</p>
-          <div aria-label="Seis módulos da rota" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,marginBottom:22}}>
-            {moduleStats.map((item,itemIndex)=><div key={item.moduleName} style={{textAlign:"center"}}>
-              <div style={{height:5,borderRadius:99,background:item.color,boxShadow:`0 0 10px ${item.color}77`,marginBottom:7}}/>
-              <span aria-hidden="true" style={{fontSize:18}}>{CONGRESS_QUESTIONS[(itemIndex*2)]?.icon}</span>
-              <span className="sr-only">{`${item.moduleName}: duas perguntas`}</span>
-            </div>)}
-          </div>
-          <Btn onClick={start} disabled={!nickname.trim()} color={C.teal} size="lg" style={{width:"100%",opacity:nickname.trim()?1:.5}}>COMEÇAR A ROTA ⚡</Btn>
-        </div>
-      </div>
+function CongressAlertStage({onComplete}){
+  const [options]=useState(()=>pickCongressSymptoms());
+  const [selected,setSelected]=useState(null);
+  const correct=options.find(symptom=>symptom.real);
+  const choose=symptom=>{if(selected)return;setSelected(symptom);symptom.real?SFX.correct():SFX.wrong();};
+  return <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:15,animation:"fadeUp .4s ease"}}>
+    <div style={{display:"flex",alignItems:"center",gap:14}}><ModuleArt mod={4} size={78} color={C.red}/><div><Tag label="Módulo 4" color={C.red}/><div style={{fontFamily:"Impact,sans-serif",fontSize:22,color:C.white,letterSpacing:2,marginTop:6}}>CAÇADOR DE ALERTAS</div><div style={{color:C.gray,fontSize:12,marginTop:3}}>Prévia com ¼ do painel original</div></div></div>
+    <div style={{background:`${C.red}10`,border:`1px solid ${C.red}44`,borderRadius:14,padding:"12px 14px",color:C.grayLt,fontSize:13,lineHeight:1.55}}>Entre estas {options.length} opções, escolha somente <strong style={{color:C.white}}>um sinal de alarme</strong> que pede atendimento rápido.</div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>{options.map(symptom=>{const isSelected=selected?.id===symptom.id;const reveal=selected&&symptom.real;const color=reveal?C.green:isSelected?C.red:C.borderHi;return <button key={symptom.id} onClick={()=>choose(symptom)} disabled={Boolean(selected)} aria-pressed={isSelected} style={{minHeight:138,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,padding:13,background:reveal?`${C.green}18`:isSelected?`${C.red}18`:C.card,border:`2px solid ${color}`,borderRadius:15,textAlign:"center",opacity:selected&&!reveal&&!isSelected?.58:1}}><span style={{fontSize:34}}>{symptom.emoji}</span><span style={{color:C.white,fontWeight:800,fontSize:13,lineHeight:1.35}}>{symptom.text}</span>{selected&&(reveal||isSelected)&&<span style={{color,fontWeight:900,fontSize:11}}>{reveal?"SINAL DE ALARME":"NÃO CONFIRMA"}</span>}</button>;})}</div>
+    {selected&&<div role="status" style={{background:selected.real?`${C.green}12`:`${C.yellow}10`,borderLeft:`4px solid ${selected.real?C.green:C.yellow}`,borderRadius:"0 12px 12px 0",padding:"12px 14px"}}><strong style={{color:selected.real?C.green:C.yellow,fontSize:13}}>{selected.real?"ACERTOU!":"O SINAL CORRETO ERA OUTRO"}</strong><p style={{color:C.grayLt,fontSize:13,lineHeight:1.55,margin:"5px 0 0"}}>{selected.real?selected.tip:correct.tip}</p></div>}
+    {selected&&<Btn onClick={()=>onComplete({selectedId:selected.id,selectedText:selected.text,correct:selected.real,correctText:correct.text,tip:selected.real?selected.tip:correct.tip})} color={C.red} size="lg" style={{width:"100%"}}>MÓDULO 5 — ENTRAR NO CASO →</Btn>}
+  </div>;
+}
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:14,alignItems:"center",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:15}}>
-        <div>
-          <div style={{color:C.white,fontWeight:900,fontSize:13,marginBottom:5}}>ABRA NO SEU CELULAR</div>
-          <p style={{color:C.grayLt,fontSize:12,lineHeight:1.5,margin:0}}>Aponte a câmera para abrir a versão congresso. Apelido e respostas ficam somente neste navegador.</p>
-          <button onClick={copyLink} style={{marginTop:8,background:"transparent",border:0,color:C.teal,textDecoration:"underline",fontWeight:800,fontSize:12,padding:0,minHeight:30}}>{copied?"✓ LINK COPIADO":"COPIAR LINK"}</button>
-        </div>
-        <div style={{background:"#fff",padding:7,borderRadius:10,lineHeight:0}} aria-label="QR Code para abrir a versão congresso">
-          <QRCodeSVG value={congressUrl} size={92} bgColor="#ffffff" fgColor="#07090f" level="M" title="Abrir versão congresso"/>
-        </div>
-      </div>
-      <Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR AO JOGO COMPLETO</Btn>
-    </div>
-  );
+function CongressReport({nickname,m1Answers,m1Questions,family,preventionChallenge,preventionResult,alertResult,m5Result,m6Answers,onReset,onExit}){
+  const participant=nickname.trim()||"Participante";
+  const reportDate=new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date());
+  const m3Correct=preventionResult?.correctCount||0;
+  const m5Safe=m5Result?.decisions?.filter(decision=>decision.ok).length||0;
+  const m6Correct=m6Answers.filter(answer=>answer.correct).length;
+  const decisionCorrect=m3Correct+(alertResult?.correct?1:0)+m5Safe+m6Correct;
+  const familyDef=family?FAM_DEFS.find(item=>item.id===family.id):null;
+  const familyFactors=(family?.factors||[]).map(id=>FAM_FACTORS.find(item=>item.id===id)).filter(Boolean);
+  const modules=[
+    {n:1,title:"Pressão Quest",value:m1Answers.filter(Boolean).length,max:2,label:`${m1Answers.filter(Boolean).length}/2 hábitos respondidos`,color:C.red},
+    {n:2,title:"Missão Família",value:family?1:0,max:1,label:family?"1 familiar mapeado":"não mapeado",color:C.amber},
+    {n:3,title:"Batalha da Prevenção",value:m3Correct,max:3,label:`${m3Correct}/3 cartas protetoras`,color:C.green},
+    {n:4,title:"Caçador de Alertas",value:alertResult?.correct?1:0,max:1,label:alertResult?.correct?"sinal reconhecido":"revisar sinal",color:C.red},
+    {n:5,title:"Consequências",value:m5Safe,max:2,label:`${m5Safe}/2 decisões seguras`,color:C.orange},
+    {n:6,title:"Como Ajudar",value:m6Correct,max:2,label:`${m6Correct}/2 acertos`,color:C.teal},
+  ];
+  const answerReview=(answers,questions)=>answers.map(answer=>{const question=questions.find(item=>item.id===answer.id);return question?{...answer,question}:null;}).filter(Boolean);
+  return <div data-report style={{padding:"16px",display:"flex",flexDirection:"column",gap:18,animation:"fadeUp .4s ease"}}>
+    <div className="print-page-footer" aria-hidden="true">MOSTRA DE PRODUTOS EDUCACIONAIS · VERSÃO {APP_VERSION}</div>
+    <div className="print-letterhead" aria-hidden="true"><div className="print-letterhead__mark"><svg viewBox="0 0 64 64"><path d="M32 52S10 39 10 22c0-8 5-13 13-13 5 0 8 3 9 7 2-4 5-7 10-7 8 0 13 5 13 13 0 17-23 30-23 30Z" strokeWidth="3"/><path d="M14 31h10l4-8 7 17 5-9h10" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div><div><div className="print-letterhead__brand">DESAFIO HIPERTENSÃO</div><div className="print-letterhead__subtitle">Conhecimento que protege · escolhas que transformam</div></div><div className="print-letterhead__meta">Prévia Congresso<br/>{reportDate} · versão {APP_VERSION}</div><div className="print-letterhead__title"><p>Relatório da experiência educacional</p><h1>{participant}</h1></div></div>
+    <div className="print-congress-summary"><strong>6 módulos vivenciados</strong><span>{decisionCorrect}/8 indicadores educativos protetores · não é nota ou diagnóstico</span></div>
+    <div className="screen-report-header" style={{textAlign:"center",background:`linear-gradient(150deg,${C.green}1a,${C.card},${C.teal}15)`,border:`2px solid ${C.green}55`,borderRadius:24,padding:"26px 18px"}}><div style={{fontSize:48}}>🎓</div><Tag label="Relatório congresso" color={C.green}/><div style={{fontFamily:"Impact,sans-serif",fontSize:30,letterSpacing:2,color:C.white,marginTop:12}}>MISSÃO CONCLUÍDA, {participant.toUpperCase()}</div><div style={{fontFamily:"Impact,sans-serif",fontSize:44,color:C.green,marginTop:12}}>6/6 MÓDULOS</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.55,margin:"8px 0 0"}}>Você experimentou uma prévia das seis mecânicas do produto completo.</p></div>
+    <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:16}}><div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.teal,letterSpacing:2,marginBottom:12}}>MAPA DA EXPERIÊNCIA</div><div style={{display:"flex",flexDirection:"column",gap:10}}>{modules.map(item=><div key={item.n} className="report-card" style={{background:C.surface,border:`1px solid ${item.color}44`,padding:"10px 12px",borderRadius:12}}><div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:6}}><strong style={{color:C.white,fontSize:12}}>M{item.n} · {item.title}</strong><span style={{color:item.color,fontWeight:900,fontSize:11,textAlign:"right"}}>{item.label}</span></div><ProgressBar value={item.value} max={item.max} color={item.color} h={6}/></div>)}</div><p style={{color:C.gray,fontSize:10,lineHeight:1.5,margin:"12px 0 0"}}>As barras descrevem atividades diferentes. O mapeamento familiar registra participação, não desempenho nem risco clínico.</p></div>
+    <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:16}}><div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.white,letterSpacing:2,marginBottom:12}}>O QUE ACONTECEU EM CADA MÓDULO</div><div style={{display:"flex",flexDirection:"column",gap:12}}>
+      <div className="report-card" style={{borderLeft:`3px solid ${C.red}`,paddingLeft:12}}><strong style={{color:C.red}}>M1 · Duas perguntas de hábitos</strong>{m1Questions.map((question,index)=><p key={question.id} style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{index+1}. {question.q} <strong style={{color:C.white}}>{m1Answers[index]?.t||"Sem resposta"}</strong></p>)}<p style={{color:C.gray,fontSize:10,lineHeight:1.5,margin:"7px 0 0"}}>Autorrelato educativo: não compõe nota, risco ou diagnóstico.</p></div>
+      <div className="report-card" style={{borderLeft:`3px solid ${C.amber}`,paddingLeft:12}}><strong style={{color:C.amber}}>M2 · Um membro da família</strong><p style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{familyDef?.label||"Familiar"}{family?.age?` · ${family.age} anos`:""}. {familyFactors.length?`Antecedentes registrados: ${familyFactors.map(item=>item.label).join(", ")}.`:"Nenhum antecedente foi marcado."}</p></div>
+      <div className="report-card" style={{borderLeft:`3px solid ${C.green}`,paddingLeft:12}}><strong style={{color:C.green}}>M3 · Um caso de prevenção</strong><p style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{preventionChallenge?.category}: {preventionResult?.text||"Plano montado"} ({m3Correct}/3 cartas protetoras).</p></div>
+      <div className="report-card" style={{borderLeft:`3px solid ${C.red}`,paddingLeft:12}}><strong style={{color:C.red}}>M4 · Um sinal entre quatro</strong><p style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>Escolha: {alertResult?.selectedText}. {alertResult?.correct?"Sinal de alarme reconhecido.":`O sinal correto era: ${alertResult?.correctText}.`} {alertResult?.tip}</p></div>
+      <div className="report-card" style={{borderLeft:`3px solid ${C.orange}`,paddingLeft:12}}><strong style={{color:C.orange}}>M5 · Um caso, duas decisões</strong>{(m5Result?.decisions||[]).map((decision,index)=><p key={`${decision.scenarioId}-${index}`} style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{index+1}. {decision.choice} <strong style={{color:decision.ok?C.green:C.orange}}>{decision.ok?"Decisão segura":"Revisar"}</strong></p>)}</div>
+      <div className="report-card" style={{borderLeft:`3px solid ${C.teal}`,paddingLeft:12}}><strong style={{color:C.teal}}>M6 · Duas perguntas</strong>{answerReview(m6Answers,CONGRESS_M6_QUESTIONS).map(({question,correct},index)=><p key={question.id} style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{index+1}. {question.q} <strong style={{color:correct?C.green:C.orange}}>{correct?"Acertou":"Revisar"}</strong></p>)}</div>
+    </div></div>
+    <div className="report-footer" style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:13,padding:14,textAlign:"center"}}><p style={{color:C.grayDk,fontSize:11,margin:"0 0 3px"}}>Diretriz Brasileira de Hipertensão 2025 · OMS 2020 · AASM · AHA/ASA 2026</p><p style={{color:C.grayDk,fontSize:11,margin:0}}>Relatório educativo de uma prévia do produto. Não calcula risco e não substitui avaliação profissional.</p></div>
+    <div className="no-print" style={{display:"flex",flexDirection:"column",gap:10}}><div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🔒 Este relatório pode conter apelido, idade aproximada e antecedentes de um familiar. Salve ou compartilhe somente com autorização.</div><Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>🖨️ IMPRIMIR OU SALVAR RELATÓRIO</Btn><Btn onClick={onReset} color={C.green} size="lg" style={{width:"100%"}}>↻ PRÓXIMO VISITANTE</Btn><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>CONHECER O JOGO COMPLETO</Btn></div>
+  </div>;
+}
 
-  if(stage==="report")return(
-    <div data-report style={{padding:"16px",display:"flex",flexDirection:"column",gap:18,animation:"fadeUp .4s ease"}}>
-      <div className="print-page-footer" aria-hidden="true">MOSTRA DE PRODUTOS EDUCACIONAIS · VERSÃO {APP_VERSION}</div>
-      <div className="print-letterhead" aria-hidden="true">
-        <div className="print-letterhead__mark"><svg viewBox="0 0 64 64"><path d="M32 52S10 39 10 22c0-8 5-13 13-13 5 0 8 3 9 7 2-4 5-7 10-7 8 0 13 5 13 13 0 17-23 30-23 30Z" strokeWidth="3"/><path d="M14 31h10l4-8 7 17 5-9h10" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-        <div><div className="print-letterhead__brand">DESAFIO HIPERTENSÃO</div><div className="print-letterhead__subtitle">Conhecimento que protege · escolhas que transformam</div></div>
-        <div className="print-letterhead__meta">Versão congresso<br/>{reportDate} · versão {APP_VERSION}</div>
-        <div className="print-letterhead__title"><p>Relatório da experiência educacional</p><h1>{participant}</h1></div>
-      </div>
-      <div className="print-congress-summary"><strong>{correctCount} de {CONGRESS_QUESTIONS.length} acertos</strong><span>Resultado educacional da demonstração · não é nota, diagnóstico ou avaliação clínica</span></div>
+function CongressMode({onExit}){
+  const [stage,setStage]=useState("intro");
+  const [nickname,setNickname]=useState("");
+  const [copied,setCopied]=useState(false);
+  const [m1Answers,setM1Answers]=useState([]);
+  const [m1Questions,setM1Questions]=useState([]);
+  const [members,setMembers]=useState(()=>initMembers());
+  const [activeMemberId,setActiveMemberId]=useState(null);
+  const [family,setFamily]=useState(null);
+  const [preventionChallenge,setPreventionChallenge]=useState(()=>shuffle(PREVENTION_CHALLENGES)[0]);
+  const [preventionResult,setPreventionResult]=useState(null);
+  const [alertResult,setAlertResult]=useState(null);
+  const [m5Result,setM5Result]=useState(null);
+  const [m6Answers,setM6Answers]=useState([]);
+  const congressUrl=typeof window!=="undefined"?`${window.location.origin}${window.location.pathname}?modo=congresso`:"";
+  const start=()=>{if(!nickname.trim())return;setM1Answers([]);setM1Questions([]);setMembers(initMembers());setFamily(null);setPreventionChallenge(shuffle(PREVENTION_CHALLENGES)[0]);setPreventionResult(null);setAlertResult(null);setM5Result(null);setM6Answers([]);setStage("m1");SFX.unlock();};
+  const reset=()=>{setNickname("");setCopied(false);setActiveMemberId(null);setStage("intro");setM1Answers([]);setM1Questions([]);setMembers(initMembers());setFamily(null);setPreventionResult(null);setAlertResult(null);setM5Result(null);setM6Answers([]);};
+  const copyLink=async()=>{try{await navigator.clipboard.writeText(congressUrl);setCopied(true);setTimeout(()=>setCopied(false),1800);}catch{setCopied(false);}};
+  const activeMember=members.find(member=>member.id===activeMemberId);
+  const activeMemberDef=FAM_DEFS.find(definition=>definition.id===activeMemberId);
 
-      <div className="screen-report-header" style={{textAlign:"center",background:`linear-gradient(150deg,${C.green}1a,${C.card},${C.teal}15)`,border:`2px solid ${C.green}55`,borderRadius:24,padding:"26px 18px"}}>
-        <div style={{fontSize:48}}>🎓</div><Tag label="Relatório congresso" color={C.green}/>
-        <div style={{fontFamily:"Impact,sans-serif",fontSize:30,letterSpacing:2,color:C.white,marginTop:12}}>MISSÃO CONCLUÍDA, {participant.toUpperCase()}</div>
-        <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:6,marginTop:14}}><span style={{fontFamily:"Impact,sans-serif",fontSize:52,color:C.green}}>{correctCount}</span><span style={{color:C.grayLt,fontWeight:800}}>de {CONGRESS_QUESTIONS.length} acertos</span></div>
-        <p style={{color:C.grayLt,fontSize:12,lineHeight:1.55,margin:"10px 0 0"}}>Resultado educativo da demonstração — não é nota escolar, diagnóstico ou avaliação clínica.</p>
-      </div>
-
-      <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:16}}>
-        <div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.teal,letterSpacing:2,marginBottom:12}}>SEU MAPA DOS 6 MÓDULOS</div>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>{moduleStats.map(item=><div key={item.moduleName} className="report-card" style={{background:C.surface,border:`1px solid ${item.color}44`,padding:"10px 12px",borderRadius:12}}><div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:6}}><strong style={{color:C.white,fontSize:12}}>M{item.moduleNumber} · {['Hábitos','Família','Prevenção','Alertas','Consequências','Ação segura'][item.moduleNumber-1]}</strong><span style={{color:item.color,fontWeight:900,fontSize:12}}>{item.correct}/{item.total}</span></div><ProgressBar value={item.correct} max={item.total} color={item.color} h={6}/></div>)}</div>
-      </div>
-
-      <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:16}}>
-        <div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.white,letterSpacing:2,marginBottom:5}}>REVISÃO DAS 12 DECISÕES</div>
-        <p style={{color:C.gray,fontSize:12,lineHeight:1.5,margin:"0 0 12px"}}>O relatório mostra a resposta correta e a ideia principal de cada questão.</p>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>{answers.map((answer,answerIndex)=>{const item=CONGRESS_QUESTIONS.find(candidate=>candidate.id===answer.id);if(!item)return null;return <div key={answer.id} className="report-card" style={{background:C.surface,borderLeft:`3px solid ${answer.correct?C.green:C.orange}`,padding:"10px 12px",borderRadius:"0 10px 10px 0"}}><div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}><span>{item.icon}</span><strong style={{color:item.moduleColor,fontSize:11}}>{item.module} · questão {(answerIndex%2)+1}</strong><span style={{marginLeft:"auto",color:answer.correct?C.green:C.orange,fontWeight:900,fontSize:11}}>{answer.correct?"ACERTOU":"REVISAR"}</span></div><p style={{color:C.white,fontSize:12,fontWeight:800,lineHeight:1.4,margin:"0 0 5px"}}>{item.q}</p>{!answer.correct&&<p style={{color:C.grayLt,fontSize:11,lineHeight:1.45,margin:"0 0 4px"}}><strong style={{color:C.green}}>Resposta correta: </strong>{item.opts[item.correct]}</p>}<p style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:0}}>{item.exp}</p></div>})}</div>
-      </div>
-
-      <div className="report-footer" style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:13,padding:14,textAlign:"center"}}><p style={{color:C.grayDk,fontSize:11,margin:"0 0 3px"}}>Diretriz Brasileira de Hipertensão 2025 · OMS 2020 · AASM · AHA/ASA 2026</p><p style={{color:C.grayDk,fontSize:11,margin:0}}>Material educativo. Não substitui aferição da pressão ou avaliação profissional.</p></div>
-      <div className="no-print" style={{display:"flex",flexDirection:"column",gap:10}}><div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🔒 Este relatório contém apenas o apelido e as respostas desta demonstração. Salve ou compartilhe somente se quiser.</div><Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>🖨️ IMPRIMIR OU SALVAR RELATÓRIO</Btn><Btn onClick={resetVisitor} color={C.green} size="lg" style={{width:"100%"}}>↻ PRÓXIMO VISITANTE</Btn><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>CONHECER O JOGO COMPLETO</Btn></div>
-    </div>
-  );
-
-  const answered=selected!==null;
-  const activeModule=Math.floor(index/2)+1;
-  const questionInModule=(index%2)+1;
-  const moduleTitles=["Hábitos","História familiar","Prevenção","Sinais de alerta","Consequências","Ação segura"];
-  return(
-    <div style={{minHeight:"100vh",padding:"18px 16px 30px",display:"flex",flexDirection:"column",gap:16,animation:"slideIn .32s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <Tag label="Rota expressa" color={C.teal}/>
-        <span style={{marginLeft:"auto",color:C.grayLt,fontSize:12,fontWeight:800}}>{index+1}/{CONGRESS_QUESTIONS.length}</span>
-      </div>
-      <ProgressBar value={index+1} max={CONGRESS_QUESTIONS.length} color={question.moduleColor} label="Progresso da versão congresso" h={7}/>
-
-      <div style={{display:"flex",alignItems:"center",gap:14,background:`${question.moduleColor}10`,border:`1px solid ${question.moduleColor}44`,borderRadius:18,padding:15}}>
-        <ModuleArt mod={activeModule} size={72} color={question.moduleColor}/>
-        <div>
-          <div style={{color:question.moduleColor,fontWeight:900,fontSize:11,letterSpacing:1.5}}>{question.module.toUpperCase()} · PERGUNTA {questionInModule}/2</div>
-          <div style={{color:C.white,fontWeight:900,fontSize:17,marginTop:5}}>{moduleTitles[activeModule-1]}</div>
-        </div>
-      </div>
-
-      <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:20,padding:18}}>
-        <p style={{color:C.white,fontSize:18,fontWeight:900,lineHeight:1.45,margin:"0 0 16px"}}>{question.q}</p>
-        <div style={{display:"flex",flexDirection:"column",gap:9}}>
-          {question.opts.map((option,optionIndex)=>{
-            const isSelected=selected===optionIndex;
-            const isCorrect=optionIndex===question.correct;
-            const stateColor=answered&&isCorrect?C.green:answered&&isSelected?C.red:question.moduleColor;
-            return <button key={option} onClick={()=>choose(optionIndex)} disabled={answered} aria-pressed={isSelected}
-              style={{width:"100%",display:"flex",alignItems:"center",gap:11,textAlign:"left",padding:"12px 13px",borderRadius:12,background:answered&&(isSelected||isCorrect)?`${stateColor}18`:C.surface,border:`2px solid ${answered&&(isSelected||isCorrect)?stateColor:C.border}`,color:C.white,fontSize:14,lineHeight:1.4,opacity:answered&&!isSelected&&!isCorrect?.62:1}}>
-              <span style={{display:"grid",placeItems:"center",width:28,height:28,borderRadius:8,flexShrink:0,background:`${stateColor}20`,border:`1px solid ${stateColor}88`,color:stateColor,fontWeight:900}}>{answered&&isCorrect?"✓":String.fromCharCode(65+optionIndex)}</span>
-              <span>{option}</span>
-            </button>;
-          })}
-        </div>
-      </div>
-
-      {answered&&<div role="status" aria-live="polite" style={{background:selected===question.correct?`${C.green}12`:`${C.yellow}10`,borderLeft:`4px solid ${selected===question.correct?C.green:C.yellow}`,borderRadius:"0 13px 13px 0",padding:"13px 14px",animation:"fadeUp .3s ease"}}>
-        <div style={{color:selected===question.correct?C.green:C.yellow,fontWeight:900,fontSize:13,marginBottom:5}}>{selected===question.correct?"BOA DECISÃO!":"VALE GUARDAR ESTA IDEIA"}</div>
-        <p style={{color:C.grayLt,fontSize:13,lineHeight:1.6,margin:0}}>{question.exp}</p>
-      </div>}
-      {answered&&<Btn onClick={next} color={question.moduleColor} size="lg" style={{width:"100%"}}>{index<CONGRESS_QUESTIONS.length-1?"PRÓXIMA QUESTÃO →":"GERAR MEU RELATÓRIO 📄"}</Btn>}
-    </div>
-  );
+  if(stage==="intro")return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",gap:18,justifyContent:"center",animation:"fadeUp .4s ease"}}><div style={{position:"relative",overflow:"hidden",background:`linear-gradient(155deg,${C.teal}1f,${C.card} 45%,${C.red}16)`,border:`1px solid ${C.teal}66`,borderRadius:26,padding:"26px 20px",boxShadow:`0 0 70px ${C.teal}18`}}><div aria-hidden="true" style={{position:"absolute",right:-45,top:-45,width:160,height:160,borderRadius:"50%",border:`28px solid ${C.teal}12`}}/><div style={{position:"relative"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:18}}><Tag label="Mostra de Produtos · 2026" color={C.teal}/><span style={{color:C.grayLt,fontSize:12,fontWeight:800}}>≈ 8–12 MIN</span></div><div style={{fontFamily:"Impact,sans-serif",fontSize:38,lineHeight:.95,letterSpacing:2,color:C.white}}>PRÉVIA DO JOGO</div><div style={{fontFamily:"Impact,sans-serif",fontSize:22,lineHeight:1.1,letterSpacing:3,color:C.teal,marginTop:7}}>DESAFIO HIPERTENSÃO</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 16px"}}>Experimente uma versão curta das seis mecânicas do aplicativo completo e gere seu relatório ao final.</p><label htmlFor="congress-nickname" style={{display:"block",color:C.white,fontSize:12,fontWeight:900,letterSpacing:1,marginBottom:7}}>SUA CREDENCIAL: APELIDO</label><input id="congress-nickname" value={nickname} onChange={event=>setNickname(event.target.value.slice(0,24))} onKeyDown={event=>{if(event.key==="Enter")start();}} autoComplete="off" maxLength={24} placeholder="Como quer aparecer no relatório?" style={{width:"100%",boxSizing:"border-box",background:C.bg,border:`2px solid ${nickname.trim()?C.teal:C.borderHi}`,borderRadius:12,padding:"11px 13px",color:C.white,fontSize:15,marginBottom:6}}/><p style={{color:C.gray,fontSize:11,lineHeight:1.45,margin:"0 0 16px"}}>Use apenas um apelido. O Módulo 2 pedirá informações de um familiar; você pode marcar somente o que souber e quiser informar.</p><div aria-label="Rota com seis módulos" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,marginBottom:20}}>{[[C.red,"❤️","2 perguntas"],[C.amber,"🧬","1 familiar"],[C.green,"🛡️","1 caso"],[C.red,"🔍","4 sintomas"],[C.orange,"⚠️","1 caso"],[C.teal,"🏥","2 perguntas"]].map(([color,icon,label],index)=><div key={label} style={{textAlign:"center"}}><div style={{height:5,borderRadius:99,background:color,boxShadow:`0 0 10px ${color}77`,marginBottom:7}}/><span aria-hidden="true" style={{fontSize:18}}>{icon}</span><span className="sr-only">{`Módulo ${index+1}: ${label}`}</span></div>)}</div><Btn onClick={start} disabled={!nickname.trim()} color={C.teal} size="lg" style={{width:"100%"}}>COMEÇAR A PRÉVIA ⚡</Btn></div></div><div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:14,alignItems:"center",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:15}}><div><div style={{color:C.white,fontWeight:900,fontSize:13,marginBottom:5}}>ABRA NO SEU CELULAR</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.5,margin:0}}>Aponte a câmera para abrir a mesma experiência.</p><button onClick={copyLink} style={{marginTop:8,background:"transparent",border:0,color:C.teal,textDecoration:"underline",fontWeight:800,fontSize:12,padding:0,minHeight:30}}>{copied?"✓ LINK COPIADO":"COPIAR LINK"}</button></div><div style={{background:"#fff",padding:7,borderRadius:10,lineHeight:0}} aria-label="QR Code para abrir a versão congresso"><QRCodeSVG value={congressUrl} size={92} bgColor="#ffffff" fgColor="#07090f" level="M" title="Abrir versão congresso"/></div></div><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR AO JOGO COMPLETO</Btn></div>;
+  if(stage==="m1")return <M1Quiz key="congress-m1" questionCount={CONGRESS_PREVIEW_CONFIG.m1Questions} onFinish={(answers,questions)=>{setM1Answers(answers);setM1Questions(questions);setStage("m2sel");}}/>;
+  if(stage==="m2sel")return <M2Selector members={members} onEdit={id=>{setActiveMemberId(id);setStage("m2detail");}} onFinish={()=>setStage("m3")}/>;
+  if(stage==="m2detail"&&activeMember&&activeMemberDef)return <M2Detail member={activeMember} memberDef={activeMemberDef} onBack={()=>setStage("m2sel")} saveLabel="💾 SALVAR FAMILIAR E AVANÇAR" onSave={updated=>{setMembers(previous=>previous.map(member=>member.id===updated.id?updated:member));setFamily(updated);setStage("m3");}}/>;
+  if(stage==="m3")return <M3Challenge key={preventionChallenge.id} challenge={preventionChallenge} challengeIndex={0} totalChallenges={1} unlockedAllies={[]} combo={0} onSubmit={result=>{setPreventionResult(result);setStage("m4");}}/>;
+  if(stage==="m4")return <CongressAlertStage onComplete={result=>{setAlertResult(result);setStage("m5");}}/>;
+  if(stage==="m5")return <M5Game scenarioCount={CONGRESS_PREVIEW_CONFIG.m5Scenarios} onFinish={(score,totalDamage,decisions)=>{setM5Result({score,totalDamage,decisions});setStage("m6");}}/>;
+  if(stage==="m6")return <CongressKnowledgeStage key="congress-m6" moduleNumber={6} questions={CONGRESS_M6_QUESTIONS} onComplete={answers=>{setM6Answers(answers);setStage("report");}}/>;
+  return <CongressReport nickname={nickname} m1Answers={m1Answers} m1Questions={m1Questions} family={family} preventionChallenge={preventionChallenge} preventionResult={preventionResult} alertResult={alertResult} m5Result={m5Result} m6Answers={m6Answers} onReset={reset} onExit={onExit}/>;
 }
 
 function QuizFinalIntro({finalQuiz,onStart}){
@@ -4177,7 +4139,7 @@ export default function PressaoQuest(){
     <div style={{minHeight:"100vh",background:C.bg,color:C.white,fontFamily:"'Segoe UI',system-ui,sans-serif",position:"relative"}}>
       <style>{GLOBAL_CSS}</style>
       <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
-      <ThreeBackground moduleColor={moduleColor}/>
+      {screen!=="congress"&&<ThreeBackground moduleColor={moduleColor}/>}
       <ModuleAura color={moduleColor} label={currentModuleLabel}/>
       <SoundToggle on={soundOn} onToggle={()=>setSoundOn(v=>!v)}/>
 
