@@ -1,6 +1,6 @@
 # Documentação do projeto
 
-## Documentos correntes da versão 1.4.0
+## Documentos correntes da versão 1.5.0
 
 - `VERSAO_ATUAL.md` — escopo, interpretação e limitações;
 - `VERSAO_CONGRESSO.md` — estado técnico verificado;
