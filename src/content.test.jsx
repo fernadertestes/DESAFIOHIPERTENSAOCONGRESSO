@@ -3,10 +3,11 @@ import {
   FINAL_QUIZ_BANK,
   M4_SYMPTOMS,
   M5_SCENARIOS_BANK,
+  M6_ACTIONS,
   PREVENTION_CHALLENGES,
   QUIZ_QUESTIONS_BANK,
-  CONGRESS_M6_SITUATION,
   CONGRESS_PREVIEW_CONFIG,
+  pickCongressActions,
   pickCongressFinalQuiz,
   pickCongressSymptoms,
 } from "../pressao-quest-completo.jsx";
@@ -66,8 +67,12 @@ describe("integridade dos bancos de conteúdo",()=>{
     expect(CONGRESS_PREVIEW_CONFIG.m5Scenarios).toBe(1);
     expect(CONGRESS_PREVIEW_CONFIG.m5Questions).toBe(2);
     expect(M5_SCENARIOS_BANK.every(scenario=>scenario.steps.length===2)).toBe(true);
-    expect(CONGRESS_PREVIEW_CONFIG.m6Situations).toBe(1);
-    expect(CONGRESS_M6_SITUATION.options.filter(option=>option.correct)).toHaveLength(1);
+    expect(CONGRESS_PREVIEW_CONFIG.m6ActionOptions).toBe(3);
+    expect(CONGRESS_PREVIEW_CONFIG.m6Commitments).toBe(1);
+    const actions=pickCongressActions();
+    expect(actions).toHaveLength(3);
+    expectUniqueIds(actions);
+    expect(actions.every(action=>M6_ACTIONS.includes(action))).toBe(true);
     expect(CONGRESS_PREVIEW_CONFIG.finalQuizQuestions).toBe(2);
 
     const finalQuiz=pickCongressFinalQuiz();

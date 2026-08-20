@@ -1,4 +1,4 @@
-# Versão Congresso — 1.5.0 — agosto de 2026
+# Versão Congresso — 1.6.0 — agosto de 2026
 
 Documento corrente da versão preparada para demonstração acadêmica. Relatórios anteriores em `docs/` permanecem como histórico e não substituem este estado.
 
@@ -13,18 +13,18 @@ Documento corrente da versão preparada para demonstração acadêmica. Relatór
 - fallback estático para ausência de WebGL e tratamento global de erro;
 - pontuação do Módulo 3 integrada com denominador real e teste de regressão;
 - CI configurada para testar, compilar e auditar cada push e pull request.
-- Versão Congresso como prévia fiel das seis mecânicas: M1 com duas perguntas sorteadas do radar de hábitos original; M2 com um familiar; M3 com um caso; M4 com quatro sintomas e um correto; M5 com um caso de duas decisões; M6 com uma situação familiar; quiz final com duas perguntas de módulos diferentes; relatório individual em PDF e reinício entre visitantes.
+- Versão Congresso reconstruída como mini jogo completo: usa diretamente M1Quiz, M2Selector/M2Detail, M3Challenge, M4Game, M5Game, M6Game e QuizFinal; apenas os volumes são reduzidos para 2 perguntas, 1 familiar, 1 caso, 4 sintomas/1 escolha, 1 caso/2 decisões, 3 ações/1 compromisso e 2 perguntas finais.
 
 ## Lighthouse de produção
 
 Medição local da Versão Congresso em Chrome headless, viewport móvel, em 20/08/2026:
 
-- desempenho: 99/100;
+- desempenho: 98/100;
 - acessibilidade: 100/100;
 - boas práticas: 100/100;
 - SEO: 100/100;
-- FCP: 1,5 s; LCP: 2,1 s; TBT: 40 ms; CLS: 0;
-- carregamento inicial da prévia: 188 KiB; o fundo 3D permanece disponível no jogo completo e não é baixado no modo congresso.
+- FCP: 1,5 s; LCP: 2,1 s; TBT: 100 ms; CLS: 0;
+- carregamento inicial da prévia: 187 KiB; o fundo 3D permanece disponível no jogo completo e não é baixado no modo congresso.
 - nenhum erro de console.
 
 Resultados automatizados não substituem teste manual com teclado, VoiceOver/NVDA e adolescentes reais.
@@ -33,7 +33,7 @@ Resultados automatizados não substituem teste manual com teclado, VoiceOver/NVD
 
 O produto é um **protótipo digital educacional gamificado baseado em diretrizes selecionadas**. Não é instrumento validado, não demonstra eficácia por si só, não mede risco clínico e não substitui aferição ou avaliação profissional.
 
-O indicador da prévia soma nove decisões educativas distribuídas entre prevenção, alerta, consequências, situação familiar e quiz final. Radar de hábitos e história familiar são apresentados separadamente para não converter contexto pessoal em desempenho.
+O indicador da prévia soma oito decisões educativas distribuídas entre prevenção, alerta, consequências e quiz final. Radar de hábitos, história familiar e compromisso do plano de ação são apresentados separadamente para não converter contexto pessoal em desempenho.
 
 ## Documentos normativos desta versão
 
