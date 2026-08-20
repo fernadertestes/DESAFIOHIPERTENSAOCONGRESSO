@@ -21,9 +21,10 @@ A rota solicita um apelido e apresenta uma prévia reduzida das mecânicas origi
 3. Módulo 3: um caso sorteado do construtor de planos de prevenção;
 4. Módulo 4: quatro dos dezesseis sintomas, com escolha de um único sinal de alarme;
 5. Módulo 5: um caso sorteado, com suas duas decisões;
-6. Módulo 6: duas perguntas sobre busca segura de ajuda.
+6. Módulo 6: uma situação familiar sobre como ajudar com segurança;
+7. Quiz final: duas perguntas sorteadas de módulos diferentes.
 
-O tempo esperado é de oito a doze minutos. Ao final, o participante recebe um relatório individual que distingue conhecimento, participação no mapa familiar, plano preventivo, reconhecimento de alerta e decisões seguras. O relatório pode ser impresso ou salvo em PDF, em preto e branco e com folha timbrada.
+O tempo esperado é de oito a doze minutos. Ao final, o participante recebe um relatório individual que distingue conhecimento, participação no mapa familiar, plano preventivo, reconhecimento de alerta, decisões seguras, a situação do Módulo 6 e o quiz final. O relatório pode ser impresso ou salvo em PDF, em preto e branco e com folha timbrada.
 
 ## Privacidade
 
