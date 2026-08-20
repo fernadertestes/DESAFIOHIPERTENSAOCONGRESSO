@@ -1,6 +1,6 @@
 # Desafio Hipertensão — especificação atual
 
-**Versão:** 1.3.0
+**Versão:** 1.4.0
 
 **Data da revisão:** 19 de agosto de 2026
 
@@ -28,7 +28,7 @@ A aleatoriedade amplia variedade e rejogabilidade, mas impede comparação diret
 
 Não há backend, conta, analytics ou armazenamento persistente. As respostas permanecem na memória do navegador durante a partida. O PDF é produzido pelo próprio navegador e pode conter informações pessoais; a guarda fica sob controle do participante.
 
-A Versão Congresso solicita somente um apelido, apresenta duas perguntas de conhecimento por módulo e gera um relatório educacional imprimível. Não solicita hábitos ou histórico familiar. Apelido e respostas existem apenas na memória do navegador e são apagados ao iniciar o próximo visitante ou fechar a página.
+A Versão Congresso solicita um apelido e oferece uma amostra reduzida das seis mecânicas do jogo completo. O Módulo 2 permite registrar idade aproximada e antecedentes de um familiar. Apelido, respostas e dados familiares existem apenas na memória do navegador e são apagados ao iniciar o próximo visitante ou fechar a página. O relatório educacional pode ser impresso ou salvo em PDF.
 
 ## Limitações conhecidas
 

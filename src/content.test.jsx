@@ -5,7 +5,9 @@ import {
   M5_SCENARIOS_BANK,
   PREVENTION_CHALLENGES,
   QUIZ_QUESTIONS_BANK,
-  CONGRESS_QUESTIONS,
+  CONGRESS_M6_QUESTIONS,
+  CONGRESS_PREVIEW_CONFIG,
+  pickCongressSymptoms,
 } from "../pressao-quest-completo.jsx";
 
 function expectUniqueIds(items){
@@ -54,11 +56,21 @@ describe("integridade dos bancos de conteúdo",()=>{
     });
   });
 
-  it("mantém a versão congresso com duas perguntas válidas por módulo",()=>{
-    expect(CONGRESS_QUESTIONS).toHaveLength(12);
-    for(let moduleNumber=1;moduleNumber<=6;moduleNumber++){
-      expect(CONGRESS_QUESTIONS.filter(question=>question.module===`Módulo ${moduleNumber}`)).toHaveLength(2);
-    }
-    expectUniqueIds(CONGRESS_QUESTIONS);
+  it("mantém a prévia congresso com a amostra correta de cada módulo",()=>{
+    expect(CONGRESS_PREVIEW_CONFIG.m1Questions).toBe(2);
+    expect(CONGRESS_PREVIEW_CONFIG.familyMembers).toBe(1);
+    expect(CONGRESS_PREVIEW_CONFIG.preventionCases).toBe(1);
+    expect(CONGRESS_PREVIEW_CONFIG.symptomOptions).toBe(M4_SYMPTOMS.length/4);
+    expect(CONGRESS_PREVIEW_CONFIG.correctSymptoms).toBe(1);
+    expect(CONGRESS_PREVIEW_CONFIG.m5Scenarios).toBe(1);
+    expect(CONGRESS_PREVIEW_CONFIG.m5Questions).toBe(2);
+    expect(M5_SCENARIOS_BANK.every(scenario=>scenario.steps.length===2)).toBe(true);
+    expect(CONGRESS_M6_QUESTIONS).toHaveLength(2);
+    expect(CONGRESS_M6_QUESTIONS.every(question=>question.module==="Módulo 6")).toBe(true);
+    expectUniqueIds(CONGRESS_M6_QUESTIONS);
+
+    const symptoms=pickCongressSymptoms();
+    expect(symptoms).toHaveLength(4);
+    expect(symptoms.filter(symptom=>symptom.real)).toHaveLength(1);
   });
 });
