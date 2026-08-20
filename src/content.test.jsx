@@ -5,7 +5,7 @@ import {
   M5_SCENARIOS_BANK,
   PREVENTION_CHALLENGES,
   QUIZ_QUESTIONS_BANK,
-  SHOWCASE_QUESTIONS,
+  CONGRESS_QUESTIONS,
 } from "../pressao-quest-completo.jsx";
 
 function expectUniqueIds(items){
@@ -54,11 +54,11 @@ describe("integridade dos bancos de conteúdo",()=>{
     });
   });
 
-  it("mantém uma rota expressa com um checkpoint válido por módulo",()=>{
-    expect(SHOWCASE_QUESTIONS).toHaveLength(6);
-    expect(SHOWCASE_QUESTIONS.map(question=>question.module)).toEqual([
-      "Módulo 1","Módulo 2","Módulo 3","Módulo 4","Módulo 5","Módulo 6",
-    ]);
-    expectUniqueIds(SHOWCASE_QUESTIONS);
+  it("mantém a versão congresso com duas perguntas válidas por módulo",()=>{
+    expect(CONGRESS_QUESTIONS).toHaveLength(12);
+    for(let moduleNumber=1;moduleNumber<=6;moduleNumber++){
+      expect(CONGRESS_QUESTIONS.filter(question=>question.module===`Módulo ${moduleNumber}`)).toHaveLength(2);
+    }
+    expectUniqueIds(CONGRESS_QUESTIONS);
   });
 });

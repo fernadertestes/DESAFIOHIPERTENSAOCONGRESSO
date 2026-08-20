@@ -1,10 +1,10 @@
 # Documentação do projeto
 
-## Documentos correntes da versão 1.2.0
+## Documentos correntes da versão 1.3.0
 
 - `VERSAO_ATUAL.md` — escopo, interpretação e limitações;
 - `VERSAO_CONGRESSO.md` — estado técnico verificado;
-- `MODO_MOSTRA.md` — operação da demonstração curta no evento;
+- `MODO_MOSTRA.md` — operação da Versão Congresso no evento;
 - `MATRIZ_EVIDENCIAS.md` — rastreabilidade científica;
 - `REFERENCIAS_CIENTIFICAS.md` — referências comentadas;
 - `VALIDACAO_METODOLOGICA.md` — trabalho necessário antes de alegar validade ou eficácia;

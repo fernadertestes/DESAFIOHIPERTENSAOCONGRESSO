@@ -1,4 +1,4 @@
-# Versão Congresso — 1.2.0 — agosto de 2026
+# Versão Congresso — 1.3.0 — agosto de 2026
 
 Documento corrente da versão preparada para demonstração acadêmica. Relatórios anteriores em `docs/` permanecem como histórico e não substituem este estado.
 
@@ -13,17 +13,17 @@ Documento corrente da versão preparada para demonstração acadêmica. Relatór
 - fallback estático para ausência de WebGL e tratamento global de erro;
 - pontuação do Módulo 3 integrada com denominador real e teste de regressão;
 - CI configurada para testar, compilar e auditar cada push e pull request.
-- Modo Mostra com rota expressa, QR Code, acesso direto e reinício entre visitantes.
+- Versão Congresso com apelido, duas perguntas por módulo, QR Code, relatório individual em PDF e reinício entre visitantes.
 
 ## Lighthouse de produção
 
-Medição local em Chrome headless, viewport móvel, em 18/08/2026:
+Medição local da Versão Congresso em Chrome headless, viewport móvel, em 19/08/2026:
 
 - desempenho: 99/100;
 - acessibilidade: 100/100;
 - boas práticas: 100/100;
 - SEO: 100/100;
-- FCP: 1,4 s; LCP: 2,0 s; TBT: 0 ms; CLS: 0;
+- FCP: 1,4 s; LCP: 2,0 s; TBT: 10 ms; CLS: 0;
 - nenhum erro de console.
 
 Resultados automatizados não substituem teste manual com teclado, VoiceOver/NVDA e adolescentes reais.

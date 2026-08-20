@@ -1,8 +1,8 @@
 # Desafio Hipertensão — especificação atual
 
-**Versão:** 1.2.0
+**Versão:** 1.3.0
 
-**Data da revisão:** 18 de agosto de 2026
+**Data da revisão:** 19 de agosto de 2026
 
 **Público pretendido:** adolescentes, com mediação educacional ou institucional quando aplicável.
 
@@ -28,7 +28,7 @@ A aleatoriedade amplia variedade e rejogabilidade, mas impede comparação diret
 
 Não há backend, conta, analytics ou armazenamento persistente. As respostas permanecem na memória do navegador durante a partida. O PDF é produzido pelo próprio navegador e pode conter informações pessoais; a guarda fica sob controle do participante.
 
-O Modo Mostra é ainda mais restritivo: não solicita nome, hábitos ou histórico familiar e não gera relatório individual. As seis respostas existem apenas durante a rota expressa e são apagadas ao reiniciar ou fechar a página.
+A Versão Congresso solicita somente um apelido, apresenta duas perguntas de conhecimento por módulo e gera um relatório educacional imprimível. Não solicita hábitos ou histórico familiar. Apelido e respostas existem apenas na memória do navegador e são apagados ao iniciar o próximo visitante ou fechar a página.
 
 ## Limitações conhecidas
 
