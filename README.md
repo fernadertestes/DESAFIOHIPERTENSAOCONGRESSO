@@ -27,7 +27,7 @@ O percurso possui seis módulos e um quiz final:
 6. **Como Ajudar** — treina decisões seguras em situações simuladas.
 7. **Quiz final** — revisão dos principais conceitos trabalhados.
 
-Para demonstrações públicas, a **Versão Congresso** funciona como uma prévia curta do produto completo: duas perguntas do Módulo 1, mapeamento de um familiar, um caso de prevenção, quatro opções de sintomas com um único sinal de alarme, um caso de consequências com duas decisões, uma situação familiar no Módulo 6 e um quiz final com duas perguntas. Ao final, gera um relatório da experiência. Ela pode ser aberta pelo botão da capa ou diretamente com `?modo=congresso` no final da URL; o endereço antigo `?modo=mostra` continua compatível.
+Para demonstrações públicas, a **Versão Congresso** funciona como um mini jogo completo: reutiliza a jogabilidade real de todos os módulos, reduzindo apenas a quantidade. São duas perguntas do Módulo 1, um familiar no Módulo 2, um caso no Módulo 3, quatro sintomas e uma escolha no Módulo 4, um caso com duas decisões no Módulo 5, uma ação escolhida entre três no Módulo 6 e duas perguntas no quiz final. Ao final, gera um relatório da experiência. Ela pode ser aberta pelo botão da capa ou diretamente com `?modo=congresso` no final da URL; o endereço antigo `?modo=mostra` continua compatível.
 
 Ao concluir o percurso, o participante pode imprimir ou salvar o relatório de aprendizagem em PDF. A versão de impressão usa formato A4, preto e branco, folha timbrada do Desafio Hipertensão, identificação do participante, data de emissão e quebras de página preparadas para preservar a leitura dos cartões.
 
