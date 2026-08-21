@@ -36,7 +36,7 @@ Mini jogo completo para demonstração pública: 2 perguntas no M1, 1 familiar n
 
 ### Módulo Professor
 
-Roteiro independente para uma aula de aproximadamente 25–35 minutos. Antes de cada módulo, o professor recebe objetivo, tempo, dinâmica, pergunta de discussão e cuidado ético. A turma inicia o jogo completo pelo QR Code no menu principal; o roteiro não coleta dados nem gera relatório próprio.
+Roteiro independente para uma aula de aproximadamente 25–35 minutos, destinado principalmente a adolescentes de 13–17 anos, do 8º e 9º anos do Ensino Fundamental ao Ensino Médio. Inclui discurso de apresentação, fundamentação dialógica e problematizadora inspirada em Paulo Freire, preparação, combinados de participação e, para cada módulo, fala sugerida, passo a passo, respostas a observar, intervenções, transição e cuidado ético. O fechamento orienta o quiz, a síntese e o pós-aula. A turma inicia o jogo completo pelo QR Code no menu principal e pode repetir a experiência em casa; o roteiro não coleta dados nem gera relatório próprio.
 
 ## Objetivo educacional
 
