@@ -986,7 +986,7 @@ function M1Home({onStart,onShowcase,onLesson,playerName,onDevUnlock}){
         {/* Hero sobre o background — título já está na capa */}
         <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",alignItems:"center",gap:14,padding:"12vh 8px 24px",textAlign:"center"}}>
           <div style={{width:"100%",maxWidth:360,aspectRatio:"9 / 14",maxHeight:"42vh",borderRadius:20,overflow:"hidden",border:`1px solid ${C.red}44`,boxShadow:`0 0 50px ${C.red}33`,position:"relative"}}>
-            <img src={MEDIA.cover} alt="Desafio Hipertensão" fetchPriority="high" decoding="async" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+            <img src={MEDIA.cover} alt="Desafio Hipertensão" fetchpriority="high" decoding="async" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
           </div>
           <Tag label="6 Módulos · Game educativo" color={C.red}/>
           <Btn onClick={onStart} color={C.red} size="lg" style={{width:"100%",maxWidth:320,boxShadow:`0 0 28px ${C.red}66`}}>INICIAR QUEST ▶</Btn>
@@ -3131,7 +3131,7 @@ function TeacherModuleTutorial({guide,onOpenGame,onNext,onExit,isLast}){
 function TeacherMode({onExit}){
   const [step,setStep]=useState("intro");
   const fullGameUrl=typeof window!=="undefined"?(()=>{const url=new URL(window.location.href);url.searchParams.delete("modo");return url.toString();})():"";
-  const openFullGame=()=>{const opened=window.open(fullGameUrl,"_blank","noopener");if(opened)opened.opener=null;};
+  const openFullGame=()=>{const opened=window.open(fullGameUrl,"_blank");if(opened)opened.opener=null;};
   if(step==="intro")return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",justifyContent:"center",gap:16,animation:"fadeUp .4s ease"}}>
     <div style={{background:`linear-gradient(145deg,${C.amber}22,${C.card} 50%,${C.teal}12)`,border:`2px solid ${C.amber}55`,borderRadius:26,padding:"25px 19px",position:"relative",overflow:"hidden"}}><div aria-hidden="true" style={{position:"absolute",right:-24,top:-25,fontSize:128,opacity:.1}}>🧑‍🏫</div><div style={{position:"relative"}}><Tag label="Roteiro de condução" color={C.amber}/><div style={{fontFamily:"Impact,sans-serif",fontSize:34,letterSpacing:2,color:C.white,lineHeight:.95,marginTop:14}}>MÓDULO PROFESSOR</div><div style={{color:C.amber,fontWeight:900,fontSize:12,letterSpacing:1.2,marginTop:8}}>A TURMA JOGA O JOGO COMPLETO</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 0"}}>Este modo não é uma versão reduzida do jogo. Ele fica ao seu lado durante a aula: introduz a proposta e orienta sua mediação antes de cada módulo do percurso completo.</p></div></div>
     <div style={{display:"flex",flexDirection:"column",gap:9}}>{[["1","Introduza o tema e combine a dinâmica",C.amber],["2","Abra o jogo completo para a turma",C.teal],["3","Use uma orientação antes de cada módulo",C.green],["4","Feche com o quiz e uma conversa final",C.purple]].map(([number,text,color])=><div key={number} style={{display:"flex",alignItems:"center",gap:11,background:C.surface,border:`1px solid ${color}33`,borderRadius:13,padding:"11px 13px"}}><span style={{width:25,height:25,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:`${color}22`,color,fontWeight:900,fontSize:12,flexShrink:0}}>{number}</span><span style={{color:C.grayLt,fontSize:13,lineHeight:1.4}}>{text}</span></div>)}</div>

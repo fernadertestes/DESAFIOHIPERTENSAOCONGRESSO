@@ -1,4 +1,4 @@
-# Versão Congresso — 1.6.0 — agosto de 2026
+# Versão Congresso — 1.7.0 — agosto de 2026
 
 Documento corrente da versão preparada para demonstração acadêmica. Relatórios anteriores em `docs/` permanecem como histórico e não substituem este estado.
 
@@ -14,6 +14,7 @@ Documento corrente da versão preparada para demonstração acadêmica. Relatór
 - pontuação do Módulo 3 integrada com denominador real e teste de regressão;
 - CI configurada para testar, compilar e auditar cada push e pull request.
 - Versão Congresso reconstruída como mini jogo completo: usa diretamente M1Quiz, M2Selector/M2Detail, M3Challenge, M4Game, M5Game, M6Game e QuizFinal; apenas os volumes são reduzidos para 2 perguntas, 1 familiar, 1 caso, 4 sintomas/1 escolha, 1 caso/2 decisões, 3 ações/1 compromisso e 2 perguntas finais.
+- Ao fim da experiência, um QR Code direciona o participante ao jogo completo, sem substituir os controles de reinício, impressão e saída.
 
 ## Lighthouse de produção
 
