@@ -3112,7 +3112,7 @@ const LESSON_GUIDES=[
   {module:6,color:C.teal,icon:"🏥",title:"Como ajudar minha família",time:"3–4 min",objective:"Encerrar com uma ação prática, possível e compartilhada com adultos.",setup:"Peça que cada dupla escolha uma ação que caberia na rotina da turma ou de uma família fictícia.",prompt:"Qual ação conseguimos tentar nesta semana sem assumir tarefas de profissionais?",care:"Adolescentes não devem alterar, organizar ou decidir medicamentos. Apoio e busca de orientação são ações seguras."},
 ];
 
-function TeacherModuleTutorial({guide,onStart,onExit}){
+function TeacherModuleTutorial({guide,onOpenGame,onNext,onExit,isLast}){
   return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",justifyContent:"center",gap:16,animation:"fadeUp .4s ease"}}>
     <div style={{background:`linear-gradient(145deg,${guide.color}1f,${C.card})`,border:`1px solid ${guide.color}66`,borderRadius:24,padding:"22px 18px",position:"relative",overflow:"hidden"}}>
       <div aria-hidden="true" style={{position:"absolute",right:-22,top:-26,fontSize:110,opacity:.1}}>{guide.icon}</div>
@@ -3121,9 +3121,28 @@ function TeacherModuleTutorial({guide,onStart,onExit}){
     <div style={{display:"flex",flexDirection:"column",gap:10}}>
       {[["COMO CONDUZIR",guide.setup,"👥"],["PERGUNTA PARA A TURMA",guide.prompt,"💬"],["CUIDADO NA MEDIAÇÃO",guide.care,"🛟"]].map(([label,text,icon])=><div key={label} style={{background:C.surface,border:`1px solid ${C.borderHi}`,borderLeft:`3px solid ${guide.color}`,borderRadius:"0 14px 14px 0",padding:"13px 14px"}}><div style={{color:guide.color,fontSize:10,fontWeight:900,letterSpacing:1.2,marginBottom:5}}>{icon} {label}</div><p style={{color:C.grayLt,fontSize:13,lineHeight:1.55,margin:0}}>{text}</p></div>)}
     </div>
-    <Btn onClick={onStart} color={guide.color} size="lg" style={{width:"100%"}}>ABRIR MÓDULO {guide.module} PARA A TURMA →</Btn>
+    <div style={{background:`${C.teal}10`,border:`1px solid ${C.teal}33`,borderRadius:13,padding:"11px 13px",color:C.grayLt,fontSize:12,lineHeight:1.5}}>🎮 Agora, mantenha este guia aberto e abra o <strong style={{color:C.white}}>jogo completo</strong> para a turma jogar este módulo.</div>
+    <Btn onClick={onOpenGame} color={C.teal} outline size="lg" style={{width:"100%"}}>↗ ABRIR JOGO COMPLETO PARA A TURMA</Btn>
+    <Btn onClick={onNext} color={guide.color} size="lg" style={{width:"100%"}}>{isLast?"TURMA CONCLUIU O MÓDULO 6 · IR AO FECHAMENTO →":`TURMA CONCLUIU O MÓDULO ${guide.module} · PRÓXIMA ORIENTAÇÃO →`}</Btn>
     <Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR À CAPA</Btn>
   </div>;
+}
+
+function TeacherMode({onExit}){
+  const [step,setStep]=useState("intro");
+  const fullGameUrl=typeof window!=="undefined"?(()=>{const url=new URL(window.location.href);url.searchParams.delete("modo");return url.toString();})():"";
+  const openFullGame=()=>{const opened=window.open(fullGameUrl,"_blank","noopener");if(opened)opened.opener=null;};
+  if(step==="intro")return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",justifyContent:"center",gap:16,animation:"fadeUp .4s ease"}}>
+    <div style={{background:`linear-gradient(145deg,${C.amber}22,${C.card} 50%,${C.teal}12)`,border:`2px solid ${C.amber}55`,borderRadius:26,padding:"25px 19px",position:"relative",overflow:"hidden"}}><div aria-hidden="true" style={{position:"absolute",right:-24,top:-25,fontSize:128,opacity:.1}}>🧑‍🏫</div><div style={{position:"relative"}}><Tag label="Roteiro de condução" color={C.amber}/><div style={{fontFamily:"Impact,sans-serif",fontSize:34,letterSpacing:2,color:C.white,lineHeight:.95,marginTop:14}}>MÓDULO PROFESSOR</div><div style={{color:C.amber,fontWeight:900,fontSize:12,letterSpacing:1.2,marginTop:8}}>A TURMA JOGA O JOGO COMPLETO</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 0"}}>Este modo não é uma versão reduzida do jogo. Ele fica ao seu lado durante a aula: introduz a proposta e orienta sua mediação antes de cada módulo do percurso completo.</p></div></div>
+    <div style={{display:"flex",flexDirection:"column",gap:9}}>{[["1","Introduza o tema e combine a dinâmica",C.amber],["2","Abra o jogo completo para a turma",C.teal],["3","Use uma orientação antes de cada módulo",C.green],["4","Feche com o quiz e uma conversa final",C.purple]].map(([number,text,color])=><div key={number} style={{display:"flex",alignItems:"center",gap:11,background:C.surface,border:`1px solid ${color}33`,borderRadius:13,padding:"11px 13px"}}><span style={{width:25,height:25,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:`${color}22`,color,fontWeight:900,fontSize:12,flexShrink:0}}>{number}</span><span style={{color:C.grayLt,fontSize:13,lineHeight:1.4}}>{text}</span></div>)}</div>
+    <div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:13,padding:"11px 13px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🛟 Não use respostas, dados familiares ou o relatório para avaliar estudantes. Prefira discussão voluntária, personagens fictícias e decisões coletivas.</div>
+    <Btn onClick={()=>setStep(0)} color={C.amber} size="lg" style={{width:"100%"}}>INICIAR ROTEIRO DA AULA →</Btn>
+    <Btn onClick={openFullGame} color={C.teal} outline size="lg" style={{width:"100%"}}>↗ ABRIR JOGO COMPLETO EM OUTRA ABA</Btn>
+    <Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR À CAPA</Btn>
+  </div>;
+  if(step==="closing")return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",justifyContent:"center",gap:16,animation:"fadeUp .4s ease"}}><div style={{textAlign:"center",background:`linear-gradient(145deg,${C.purple}20,${C.card})`,border:`2px solid ${C.purple}55`,borderRadius:26,padding:"26px 18px"}}><div style={{fontSize:56}}>🎯</div><Tag label="Fechamento da aula" color={C.purple}/><div style={{fontFamily:"Impact,sans-serif",fontSize:30,letterSpacing:2,color:C.white,marginTop:12}}>QUIZ FINAL E CONVERSA</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.6,margin:"13px 0 0"}}>No jogo completo, conduza o quiz final. Depois, reserve alguns minutos para a turma transformar a experiência em uma ideia prática.</p></div><div style={{background:C.surface,border:`1px solid ${C.borderHi}`,borderRadius:16,padding:15}}><div style={{color:C.purple,fontSize:11,fontWeight:900,letterSpacing:1.4,marginBottom:8}}>PERGUNTAS PARA FECHAR</div><p style={{color:C.grayLt,fontSize:13,lineHeight:1.55,margin:"0 0 9px"}}>• O que foi mais fácil ou mais difícil de decidir?</p><p style={{color:C.grayLt,fontSize:13,lineHeight:1.55,margin:"0 0 9px"}}>• Que orientação você levaria para uma conversa em casa?</p><p style={{color:C.grayLt,fontSize:13,lineHeight:1.55,margin:0}}>• Quando é importante buscar ajuda de um adulto ou profissional?</p></div><div style={{background:`${C.green}10`,border:`1px solid ${C.green}44`,borderRadius:13,padding:"11px 13px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>✅ Feche reforçando: o jogo é educativo, não diagnostica hipertensão e não substitui avaliação profissional.</div><Btn onClick={openFullGame} color={C.teal} size="lg" style={{width:"100%"}}>↗ ABRIR JOGO COMPLETO PARA O QUIZ FINAL</Btn><Btn onClick={()=>setStep("intro")} color={C.amber} outline style={{width:"100%"}}>↻ REINICIAR ROTEIRO DO PROFESSOR</Btn><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR À CAPA</Btn><CreditsFooter/></div>;
+  const guide=LESSON_GUIDES[step];
+  return <TeacherModuleTutorial guide={guide} onOpenGame={openFullGame} onNext={()=>setStep(step===LESSON_GUIDES.length-1?"closing":step+1)} onExit={onExit} isLast={step===LESSON_GUIDES.length-1}/>;
 }
 
 function CongressFinalQuizIntro({questions,onStart}){
@@ -4188,7 +4207,7 @@ export default function PressaoQuest(){
         <h1 id="screen-title" className="sr-only">Desafio Hipertensão — {currentModuleLabel}</h1>
         {screen==="home"&&<M1Home onStart={()=>setScreen("name")} onShowcase={openShowcase} onLesson={openLesson} playerName={playerName} onDevUnlock={()=>setScreen("devpanel")}/>}
         {screen==="congress"&&<CongressMode onExit={closeShowcase}/>}
-        {screen==="lesson"&&<CongressMode onExit={closeLesson} lessonMode/>}
+        {screen==="lesson"&&<TeacherMode onExit={closeLesson}/>}
         {screen==="devpanel"&&<DevPanel onJump={devJumpTo} onClose={()=>setScreen("home")}/>}
         {screen==="name"&&<M1Name onConfirm={n=>{setPlayerName(n);setScreen("m1quiz");}}/>}
         {screen==="m1quiz"&&<M1Quiz onFinish={finishM1}/>}

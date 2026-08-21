@@ -8,7 +8,7 @@
 
 ## Proposta
 
-Esta é a terceira experiência do Desafio Hipertensão. Primeiro, ela introduz o professor à proposta de condução; depois, reutiliza a versão curta do Congresso (os seis módulos e o quiz final), inserindo uma tela de mediação antes de cada módulo. A tela apresenta:
+Esta é a terceira experiência do Desafio Hipertensão. Primeiro, ela introduz o professor à proposta de condução; depois, apresenta uma tela de mediação antes de cada módulo do **jogo completo**. O professor mantém este roteiro aberto e usa o botão para abrir o jogo integral para a turma em outra aba ou no projetor. A tela apresenta:
 
 - objetivo pedagógico;
 - tempo estimado;
@@ -28,4 +28,4 @@ O percurso completo é estimado em 25 a 35 minutos, conforme o tempo de conversa
 
 ## Encerramento
 
-O quiz final funciona como retomada de conceitos. O relatório segue sendo educativo e descreve a participação no percurso; não deve ser usado para avaliar, comparar ou atribuir nota a estudantes.
+O roteiro termina com orientação para conduzir o quiz final e a conversa de fechamento no jogo completo. O Módulo Professor não produz relatório próprio. Se a turma usar o relatório do jogo, ele é educativo e não deve ser usado para avaliar, comparar ou atribuir nota a estudantes.
