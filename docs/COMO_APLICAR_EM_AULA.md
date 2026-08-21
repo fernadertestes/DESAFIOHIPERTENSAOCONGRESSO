@@ -8,7 +8,7 @@
 
 ## Proposta
 
-Esta é a terceira experiência do Desafio Hipertensão. Primeiro, ela introduz o professor à proposta de condução; depois, apresenta uma tela de mediação antes de cada módulo do **jogo completo**. O professor mantém este roteiro aberto e usa o botão para abrir o jogo integral para a turma em outra aba ou no projetor. A tela apresenta:
+Esta é a terceira experiência do Desafio Hipertensão. Primeiro, ela introduz o professor à proposta de condução; depois, apresenta uma tela de mediação antes de cada módulo do **jogo completo**. A turma inicia o jogo integral pelo QR Code do menu principal; o professor mantém este roteiro aberto como apoio à mediação. A tela apresenta:
 
 - objetivo pedagógico;
 - tempo estimado;

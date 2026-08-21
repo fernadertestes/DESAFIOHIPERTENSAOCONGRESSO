@@ -36,7 +36,7 @@ Mini jogo completo para demonstração pública: 2 perguntas no M1, 1 familiar n
 
 ### Módulo Professor
 
-Roteiro independente para uma aula de aproximadamente 25–35 minutos. Antes de cada módulo, o professor recebe objetivo, tempo, dinâmica, pergunta de discussão e cuidado ético. O roteiro abre o jogo completo em outra aba para a turma, mas não coleta dados nem gera relatório próprio.
+Roteiro independente para uma aula de aproximadamente 25–35 minutos. Antes de cada módulo, o professor recebe objetivo, tempo, dinâmica, pergunta de discussão e cuidado ético. A turma inicia o jogo completo pelo QR Code no menu principal; o roteiro não coleta dados nem gera relatório próprio.
 
 ## Objetivo educacional
 

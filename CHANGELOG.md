@@ -4,7 +4,7 @@
 
 - Inclui a Versão Congresso como mini jogo completo e relatório A4;
 - adiciona QR Code do jogo completo ao encerramento do Congresso;
-- adiciona o Módulo Professor para mediação de aula com o jogo completo em outra aba;
+- adiciona o Módulo Professor para mediação de aula, com acesso da turma ao jogo completo pelo QR Code do menu principal;
 - inclui créditos de Fernando Nader nas telas de encerramento;
 - atualiza documentação, checklist e auditoria pré-congresso.
 
