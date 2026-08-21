@@ -10,6 +10,7 @@ O Desafio Hipertensão integra a Mostra de Produtos Educacionais de 21/08/2026, 
 - acesso direto acrescentando `?modo=congresso` à URL publicada;
 - compatibilidade com o endereço anterior `?modo=mostra`;
 - QR Code gerado no próprio navegador para o endereço da rota;
+- QR Code ao fim da experiência para abrir o jogo completo, além do botão já disponível;
 - botão `Próximo visitante` ao final para apagar apelido e respostas e reiniciar.
 
 ## Experiência
