@@ -7,6 +7,8 @@ import {
   PREVENTION_CHALLENGES,
   QUIZ_QUESTIONS_BANK,
   CONGRESS_PREVIEW_CONFIG,
+  LESSON_GUIDES,
+  PUBLIC_GAME_URL,
   pickCongressActions,
   pickCongressFinalQuiz,
   pickCongressSymptoms,
@@ -18,6 +20,11 @@ function expectUniqueIds(items){
 }
 
 describe("integridade dos bancos de conteúdo",()=>{
+  it("mantém o QR Code apontando para o domínio público oficial",()=>{
+    expect(PUBLIC_GAME_URL).toBe("https://desafiohipertensao.iabrasilhub.com.br");
+    expect(new URL(PUBLIC_GAME_URL).protocol).toBe("https:");
+  });
+
   it("mantém o radar com 60 perguntas válidas e IDs únicos",()=>{
     expect(QUIZ_QUESTIONS_BANK).toHaveLength(60);
     expectUniqueIds(QUIZ_QUESTIONS_BANK);
@@ -83,5 +90,20 @@ describe("integridade dos bancos de conteúdo",()=>{
     const symptoms=pickCongressSymptoms();
     expect(symptoms).toHaveLength(4);
     expect(symptoms.filter(symptom=>symptom.real)).toHaveLength(1);
+  });
+
+  it("mantém um roteiro completo para os seis módulos do professor",()=>{
+    expect(LESSON_GUIDES).toHaveLength(6);
+    expect(LESSON_GUIDES.map(guide=>guide.module)).toEqual([1,2,3,4,5,6]);
+    LESSON_GUIDES.forEach(guide=>{
+      expect(guide.prepare.length).toBeGreaterThan(30);
+      expect(guide.say.length).toBeGreaterThan(50);
+      expect(guide.steps).toHaveLength(4);
+      expect(guide.prompt.length).toBeGreaterThan(20);
+      expect(guide.listenFor.length).toBeGreaterThan(30);
+      expect(guide.intervene.length).toBeGreaterThan(30);
+      expect(guide.transition.length).toBeGreaterThan(30);
+      expect(guide.care.length).toBeGreaterThan(30);
+    });
   });
 });
