@@ -1,17 +1,19 @@
 # Documentação do projeto
 
-## Documentos correntes da versão 1.6.0
+## Documentos correntes — versão 1.7.0
 
-- `VERSAO_ATUAL.md` — escopo, interpretação e limitações;
-- `VERSAO_CONGRESSO.md` — estado técnico verificado;
-- `MODO_MOSTRA.md` — operação da Versão Congresso no evento;
-- `COMO_APLICAR_EM_AULA.md` — roteiro interativo de mediação para docentes;
-- `AUDITORIA_PRE_CONGRESSO.md` — verificação de estabilidade e checklist operacional para a apresentação;
-- `MATRIZ_EVIDENCIAS.md` — rastreabilidade científica;
-- `REFERENCIAS_CIENTIFICAS.md` — referências comentadas;
-- `VALIDACAO_METODOLOGICA.md` — trabalho necessário antes de alegar validade ou eficácia;
-- `PRIVACIDADE_ETICA.md` — proteção do público adolescente.
+| Documento | Finalidade |
+|---|---|
+| [VERSAO_ATUAL.md](VERSAO_ATUAL.md) | Escopo, interpretação e limitações vigentes |
+| [VERSAO_CONGRESSO.md](VERSAO_CONGRESSO.md) | Estado técnico da prévia para a mostra |
+| [MODO_MOSTRA.md](MODO_MOSTRA.md) | Operação da Versão Congresso no evento |
+| [COMO_APLICAR_EM_AULA.md](COMO_APLICAR_EM_AULA.md) | Roteiro de mediação do Módulo Professor |
+| [AUDITORIA_PRE_CONGRESSO.md](AUDITORIA_PRE_CONGRESSO.md) | Estabilidade, riscos e checklist de apresentação |
+| [MATRIZ_EVIDENCIAS.md](MATRIZ_EVIDENCIAS.md) | Rastreabilidade científica por domínio e item |
+| [REFERENCIAS_CIENTIFICAS.md](REFERENCIAS_CIENTIFICAS.md) | Referências comentadas |
+| [PRIVACIDADE_ETICA.md](PRIVACIDADE_ETICA.md) | Proteção do público adolescente e dados locais |
+| [VALIDACAO_METODOLOGICA.md](VALIDACAO_METODOLOGICA.md) | Etapas necessárias antes de alegar validade ou eficácia |
 
 ## Registros históricos
 
-Os demais arquivos documentam ciclos anteriores de revisão. Eles são mantidos para rastreabilidade, mas podem citar contagens, dependências ou limitações já superadas. Em caso de divergência, prevalecem os documentos correntes acima e o código da versão publicada.
+Os arquivos `AUDITORIA_*`, `REVISAO_*` e `CORRECOES_CIENTIFICAS.md` preservam decisões e revisões anteriores. Podem citar versões, dependências, contagens ou limitações já superadas. Em caso de divergência, prevalecem os documentos correntes acima e o código publicado.
