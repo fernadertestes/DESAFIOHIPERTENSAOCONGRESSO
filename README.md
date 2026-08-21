@@ -1,119 +1,108 @@
 # Desafio Hipertensão
 
-Jogo educativo em formato web para apoiar a educação em saúde de adolescentes sobre hipertensão arterial, hábitos de vida, antecedentes familiares, prevenção, sinais de alerta e atitudes seguras diante de situações de emergência.
+[![Qualidade](https://github.com/fernadertestes/DESAFIOHIPERTENSAOCONGRESSO/actions/workflows/ci.yml/badge.svg)](https://github.com/fernadertestes/DESAFIOHIPERTENSAOCONGRESSO/actions/workflows/ci.yml)
 
-O produto foi desenvolvido como recurso educacional no contexto do **Mestrado Profissional em Ensino em Ciências da Saúde e do Meio Ambiente (MECSMA / UniFOA)**.
+Protótipo web gamificado para educação em saúde cardiovascular de adolescentes. O projeto aborda hábitos, história familiar, prevenção, sinais de alerta, consequências e atitudes seguras — sem diagnosticar, calcular risco clínico ou substituir avaliação profissional.
+
+Desenvolvido no contexto do **Mestrado Profissional em Ensino em Ciências da Saúde e do Meio Ambiente (MECSMA / UniFOA)**.
+
+## Acesso rápido
+
+| Experiência | Link direto | Uso |
+|---|---|---|
+| Jogo completo | [Abrir aplicação](https://desafiohipertensaocongresso.vercel.app/) | Percurso com seis módulos e quiz final |
+| Versão Congresso | [Abrir prévia](https://desafiohipertensaocongresso.vercel.app/?modo=congresso) | Demonstração curta, com relatório e QR Code para o jogo completo |
+| Módulo Professor | [Abrir roteiro](https://desafiohipertensaocongresso.vercel.app/?modo=professor) | Guia de mediação enquanto a turma usa o jogo completo |
+
+> A rota histórica `?modo=mostra` abre a Versão Congresso; `?modo=aula` abre o Módulo Professor.
+
+## Modos de uso
+
+### Jogo completo
+
+O estudante escolhe um apelido e percorre seis módulos, seguido de quiz final, tela de conclusão e relatório de aprendizagem.
+
+1. **Radar de Hábitos** — escolhas cotidianas e saúde cardiovascular.
+2. **Família** — mapa educativo de antecedentes familiares.
+3. **Prevenção** — planos sobre alimentação, atividade física, sono e hábitos protetores.
+4. **Sinais de Alerta** — reconhecimento de situações que justificam avaliação rápida.
+5. **Consequências** — decisões simuladas e órgãos-alvo da hipertensão persistente.
+6. **Como Ajudar** — atitudes seguras e apoio familiar.
+7. **Quiz final** — revisão dos conceitos trabalhados.
+
+### Versão Congresso
+
+Mini jogo completo para demonstração pública: 2 perguntas no M1, 1 familiar no M2, 1 caso no M3, 4 sintomas/1 escolha no M4, 1 caso com 2 decisões no M5, 3 ações/1 compromisso no M6 e 2 perguntas finais. Ao terminar, gera relatório A4 em preto e branco e oferece QR Code para abrir o jogo completo.
+
+### Módulo Professor
+
+Roteiro independente para uma aula de aproximadamente 25–35 minutos. Antes de cada módulo, o professor recebe objetivo, tempo, dinâmica, pergunta de discussão e cuidado ético. O roteiro abre o jogo completo em outra aba para a turma, mas não coleta dados nem gera relatório próprio.
 
 ## Objetivo educacional
 
-Ao final da experiência, espera-se que o jogador consiga:
+Ao final da experiência, espera-se que o participante consiga:
 
 - reconhecer hábitos relacionados à saúde cardiovascular;
 - compreender que hipertensão pode ocorrer sem sintomas;
-- identificar fatores familiares relevantes sem interpretar o jogo como cálculo de risco clínico;
-- relacionar atividade física, alimentação, sono e outras escolhas à prevenção;
-- reconhecer sinais que justificam avaliação urgente;
-- saber que, diante de uma emergência, a atitude segura é buscar ajuda e acionar o serviço de emergência, sem improvisar medicamentos.
+- interpretar história familiar como informação para prevenção, sem transformá-la em cálculo de risco;
+- relacionar hábitos protetores a escolhas viáveis;
+- reconhecer sinais que justificam busca de ajuda;
+- evitar automedicação ou improviso diante de situações de urgência.
 
-## Como o jogo funciona
+## Estado para apresentação
 
-O percurso possui seis módulos e um quiz final:
-
-1. **Radar de Hábitos** — escolhas do cotidiano e saúde cardiovascular.
-2. **Família** — construção de um mapa educativo de antecedentes familiares.
-3. **Prevenção** — desafios sobre alimentação, atividade física, sono e hábitos protetores.
-4. **Sinais de Alerta** — diferencia sintomas inespecíficos de situações que exigem avaliação rápida.
-5. **Consequências** — apresenta possíveis órgãos-alvo e efeitos da hipertensão persistente.
-6. **Como Ajudar** — treina decisões seguras em situações simuladas.
-7. **Quiz final** — revisão dos principais conceitos trabalhados.
-
-Para demonstrações públicas, a **Versão Congresso** funciona como um mini jogo completo: reutiliza a jogabilidade real de todos os módulos, reduzindo apenas a quantidade. São duas perguntas do Módulo 1, um familiar no Módulo 2, um caso no Módulo 3, quatro sintomas e uma escolha no Módulo 4, um caso com duas decisões no Módulo 5, uma ação escolhida entre três no Módulo 6 e duas perguntas no quiz final. Ao final, gera um relatório da experiência. Ela pode ser aberta pelo botão da capa ou diretamente com `?modo=congresso` no final da URL; o endereço antigo `?modo=mostra` continua compatível.
-
-O **Módulo Professor** é um roteiro independente para conduzir uma aula enquanto a turma joga a versão completa. Ele introduz a aplicação e apresenta uma orientação antes de cada módulo: objetivo, tempo, dinâmica, pergunta para a turma e cuidado ético. O modo mantém o guia aberto e oferece um botão para abrir o jogo completo em outra aba; não executa a versão reduzida do Congresso nem gera relatório próprio. Ele pode ser aberto pela capa ou com `?modo=professor`; `?modo=aula` continua compatível. O módulo não substitui planejamento pedagógico, não solicita exposição de dados pessoais e não deve ser usado para atribuir nota.
-
-Ao concluir o percurso, o participante pode imprimir ou salvar o relatório de aprendizagem em PDF. A versão de impressão usa formato A4, preto e branco, folha timbrada do Desafio Hipertensão, identificação do participante, data de emissão e quebras de página preparadas para preservar a leitura dos cartões.
-
-## Nota metodológica importante
-
-**Pontos, rankings e índices exibidos no Desafio Hipertensão são elementos experimentais de gamificação.** O índice do jogo é uma média simples das atividades de conhecimento e decisão; hábitos autorreferidos, mapa familiar e compromissos não entram nessa média. Nada disso corresponde a escore clínico ou instrumento educacional validado, calcula probabilidade individual, faz diagnóstico ou orienta tratamento.
-
-O jogo é uma ferramenta educativa e não substitui aferição adequada da pressão arterial, avaliação profissional ou atendimento médico.
-
-## Base científica
-
-A revisão científica do conteúdo utiliza como referências principais:
-
-- Brandão AA, Rodrigues CIS, Bortolotto LA, et al. **Diretriz Brasileira de Hipertensão Arterial – 2025.** *Arquivos Brasileiros de Cardiologia*. 2025;122(9):e20250624. DOI: 10.36660/abc.20250624.
-- World Health Organization. **WHO Guidelines on Physical Activity and Sedentary Behaviour.** Geneva: WHO; 2020.
-- Paruthi S, Brooks LJ, D'Ambrosio C, et al. **Recommended Amount of Sleep for Pediatric Populations: A Consensus Recommendation of the American Academy of Sleep Medicine.** *J Clin Sleep Med.* 2016;12(6):785-786. DOI: 10.5664/jcsm.5866.
-- American Heart Association/American Stroke Association. **Guideline for the Early Management of Patients With Acute Ischemic Stroke.** 2026.
-
-A lista comentada está em [`docs/REFERENCIAS_CIENTIFICAS.md`](docs/REFERENCIAS_CIENTIFICAS.md).
-
-## Tecnologias
-
-- React 18
-- Vite 8
-- Three.js
-- JavaScript / JSX
+A versão 1.7.0 passou por instalação limpa, build, testes automatizados, auditoria de dependências e verificações dos fluxos principais. Consulte o [relatório pré-congresso](docs/AUDITORIA_PRE_CONGRESSO.md) e o [checklist operacional](docs/MODO_MOSTRA.md).
 
 ## Executar localmente
 
 Requer Node.js 22 ou superior.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Para gerar a versão de produção:
+| Comando | Finalidade |
+|---|---|
+| `npm run dev` | Desenvolvimento local |
+| `npm run build` | Gera `dist/` para produção |
+| `npm run preview` | Serve o build localmente |
+| `npm test` | Executa testes unitários |
+| `npm run check` | Executa testes e build |
+| `npm audit --audit-level=high` | Verifica dependências de alto risco |
 
-```bash
-npm run build
-npm run preview
-```
+Para plano B sem internet, gere o build antes do evento e execute `npm run preview -- --host 127.0.0.1 --port 4173` na máquina da apresentação.
 
-Para executar os testes das regras de pontuação:
-
-```bash
-npm test
-```
-
-Para executar testes e build local:
-
-```bash
-npm run check
-npm audit
-```
-
-## Estrutura do projeto
+## Arquitetura
 
 ```text
-src/                         entrada da aplicação
-src/scoring.js               regras puras e limites de pontuação
-src/scoring.test.js          testes das regras de pontuação
+src/                         entrada React e regras puras de pontuação
+public/media/                capa e mídia de conclusão
 public/modules/              artes dos seis módulos
-public/media/                capa e mídia da tela de conclusão
-pressao-quest-completo.jsx   componentes, conteúdo e lógica do jogo
-docs/                        documentação científica e histórico de revisão
+docs/                        documentação metodológica, operacional e histórica
+pressao-quest-completo.jsx   componentes, conteúdo e orquestração dos modos
 ```
 
-O resultado da auditoria de pontuação e build está em [`docs/AUDITORIA_PONTUACAO_E_BUILD.md`](docs/AUDITORIA_PONTUACAO_E_BUILD.md).
+Stack: React 18, Vite 8, Three.js, qrcode.react e JavaScript/JSX. Não há backend, autenticação, banco de dados, analytics ou variáveis de ambiente obrigatórias. As respostas existem apenas na memória da página atual.
 
-As imagens de interface são distribuídas em WebP para reduzir o tamanho de carregamento. O vídeo de conclusão também foi recomprimido para uso na web.
+## Documentação
+
+Comece pelo [índice de documentação](docs/README.md).
+
+- [Especificação e limites atuais](docs/VERSAO_ATUAL.md)
+- [Guia da Versão Congresso](docs/VERSAO_CONGRESSO.md)
+- [Guia do Módulo Professor](docs/COMO_APLICAR_EM_AULA.md)
+- [Auditoria pré-congresso](docs/AUDITORIA_PRE_CONGRESSO.md)
+- [Matriz de evidências](docs/MATRIZ_EVIDENCIAS.md)
+- [Referências científicas](docs/REFERENCIAS_CIENTIFICAS.md)
+- [Privacidade e ética](docs/PRIVACIDADE_ETICA.md)
+- [Plano de validação metodológica](docs/VALIDACAO_METODOLOGICA.md)
 
 ## Uso responsável
 
-O conteúdo foi escrito em linguagem acessível para adolescentes. Situações clínicas são simulações educativas. Em uma emergência real, o jogador é orientado a buscar ajuda e acionar o **SAMU 192** nas áreas cobertas, ou seguir o fluxo de emergência disponível no município.
+Pontuação, rankings e indicadores são elementos de gamificação educacional. O produto não é instrumento clínico validado, não diagnostica, não estima risco individual, não orienta tratamento e não substitui aferição ou avaliação profissional. O PDF pode conter apelido, hábitos ou informações familiares e deve ser armazenado e compartilhado com cuidado.
 
-Nesta versão não há conta, backend, analytics ou persistência: as respostas permanecem somente na memória do navegador e são apagadas ao atualizar ou fechar a página. O PDF pode conter apelido, hábitos e informações familiares e deve ser armazenado e compartilhado com cuidado.
+## Créditos
 
-## Estado da revisão
-
-Revisão científica: **agosto de 2026**.
-
-Consulte a [`versão atual`](docs/VERSAO_ATUAL.md), o [`guia da Versão Congresso`](docs/MODO_MOSTRA.md), a [`matriz de evidências`](docs/MATRIZ_EVIDENCIAS.md) e o [`plano de validação`](docs/VALIDACAO_METODOLOGICA.md). Os demais relatórios em `docs/` são registros históricos e podem descrever estados anteriores do código.
-
-## Estado atual da revisão
-
-O conteúdo clínico e educacional passou por revisão de coerência científica e de linguagem. O relatório final é um **relatório de aprendizagem**: seus indicadores representam desempenho e escolhas dentro do jogo e não constituem avaliação clínica, diagnóstico ou estimativa individual de risco cardiovascular.
+**Fernando Nader** · Médico + Programador<br>
+[drnandonader@gmail.com](mailto:drnandonader@gmail.com)
