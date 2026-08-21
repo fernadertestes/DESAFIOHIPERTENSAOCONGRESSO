@@ -34,7 +34,7 @@ Não há problema P0 conhecido. A ressalva operacional é preparar uma cópia lo
 
 **Congresso:** apelido → mesma mecânica dos seis módulos com quantidade reduzida → quiz final de duas perguntas → relatório, impressão/reinício, QR Code para o jogo completo.
 
-**Módulo Professor:** introdução da aula → orientação antes de cada módulo → abertura do jogo completo em outra aba para a turma → fechamento com quiz e conversa final. Não executa a prévia do Congresso nem gera relatório próprio.
+**Módulo Professor:** introdução da aula → orientação antes de cada módulo → turma no jogo completo iniciado pelo QR Code do menu principal → fechamento com quiz e conversa final. Não executa a prévia do Congresso nem gera relatório próprio.
 
 ## 5. Problemas críticos encontrados
 
@@ -44,7 +44,7 @@ Nenhum problema crítico encontrado.
 
 | Prioridade | Arquivo | Problema | Alteração segura realizada |
 |---|---|---|---|
-| P1 | `pressao-quest-completo.jsx` | A abertura do jogo completo pelo Módulo Professor usava uma configuração de nova aba que pode se comportar de modo inconsistente em alguns navegadores. | Simplificada a abertura por clique em nova aba; o teste confirmou que a aba abre `/`, isto é, o jogo completo. |
+| P1 | `pressao-quest-completo.jsx` | O Módulo Professor oferecia abertura direta do jogo completo, criando uma etapa duplicada no roteiro. | Removida a abertura direta; a turma inicia o jogo completo exclusivamente pelo QR Code do menu principal. |
 | P2 | `pressao-quest-completo.jsx` | A tela inicial emitia aviso React para `fetchPriority`. | O atributo foi escrito na forma reconhecida pelo DOM (`fetchpriority`); console limpo no build de produção. |
 | P2 | `docs/VERSAO_CONGRESSO.md` | O documento corrente ainda identificava a versão anterior. | Atualizado para 1.7.0 e registrado o QR Code final para o jogo completo. |
 
@@ -61,7 +61,7 @@ Nenhum problema crítico encontrado.
 | Responsividade de entrada | Sem overflow horizontal observado em 320×568, 390×844, 768×1024, 1366×768 e 1920×1080 |
 | Fluxo completo exercitado | Entrada, apelido, 10 perguntas do M1, resultado e chegada ao M2 |
 | Fluxo Congresso exercitado | Entrada, apelido, 2 perguntas do M1 e chegada ao M2 |
-| Módulo Professor exercitado | Introdução, seis orientações em sequência, abertura do jogo completo em nova aba e fechamento |
+| Módulo Professor exercitado | Introdução, seis orientações em sequência e fechamento |
 
 Não há script de lint configurado no `package.json`; por isso não há resultado de lint a executar. O build emite apenas o aviso conhecido de chunk acima de 500 kB; o pacote inicial principal tem aproximadamente 136 kB gzip e não indicou travamento nos testes.
 
@@ -97,7 +97,7 @@ Não há script de lint configurado no `package.json`; por isso não há resulta
 5. **Por que o mapa familiar não gera risco genético?** Para evitar inferências clínicas indevidas; ele registra participação e antecedentes conhecidos.
 6. **Como o conteúdo foi rastreado?** Há matriz de evidências e referências por domínio em `docs/MATRIZ_EVIDENCIAS.md` e `docs/REFERENCIAS_CIENTIFICAS.md`.
 7. **O jogo funciona sem internet?** O conteúdo não faz chamadas externas; porém é necessário servir os arquivos localmente ou já tê-los carregado, pois não há PWA.
-8. **Como o professor usa a ferramenta?** Pelo Módulo Professor, que orienta a mediação antes de cada etapa e abre o jogo completo para a turma.
+8. **Como o professor usa a ferramenta?** Pelo Módulo Professor, que orienta a mediação antes de cada etapa; a turma inicia o jogo completo pelo QR Code do menu principal.
 9. **O aluno é avaliado por nota?** Não. O relatório é educativo e não deve ser usado para comparação ou nota.
 10. **Como o produto lida com urgências?** Orienta buscar ajuda adulta e atendimento, sem prescrever ou alterar medicamentos.
 11. **Por que usar casos simulados?** Para praticar decisão e discussão sem transformar situações pessoais em exposição pública.
