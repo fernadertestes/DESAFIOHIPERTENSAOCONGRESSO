@@ -706,6 +706,15 @@ function Btn({children,onClick,color=C.teal,outline,disabled,style={},size="md",
 
 function Tag({label,color}){return <span style={{background:`${color}22`,color,border:`1px solid ${color}55`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:800,letterSpacing:1.5,textTransform:"uppercase"}}>{label}</span>;}
 
+function CreditsFooter(){
+  return <div aria-label="Créditos do projeto" style={{textAlign:"center",padding:"14px 8px 4px",borderTop:`1px solid ${C.border}`,display:"flex",flexDirection:"column",gap:3}}>
+    <span style={{color:C.grayDk,fontSize:10,fontWeight:900,letterSpacing:1.7}}>DESENVOLVIDO POR</span>
+    <strong style={{color:C.white,fontSize:13,letterSpacing:.4}}>Fernando Nader</strong>
+    <span style={{color:C.grayLt,fontSize:11}}>Médico + Programador</span>
+    <a href="mailto:drnandonader@gmail.com" style={{color:C.teal,fontSize:11,fontWeight:800,textDecoration:"none",marginTop:2}}>drnandonader@gmail.com</a>
+  </div>;
+}
+
 function RiskBadge({color,label}){return <div style={{background:`${color}22`,border:`2px solid ${color}`,borderRadius:8,padding:"3px 10px",color,fontSize:12,fontWeight:900,boxShadow:`0 0 10px ${color}44`,whiteSpace:"nowrap"}}>{label}</div>;}
 
 function ProgressBar({value,max=100,color,h=6,label="Progresso"}){
@@ -3171,7 +3180,7 @@ function CongressReport({nickname,m1Answers,m1Questions,family,preventionChallen
       <div className="report-card" style={{borderLeft:`3px solid ${C.purple}`,paddingLeft:12}}><strong style={{color:C.purple}}>Quiz final · Duas perguntas</strong>{finalQuizAnswers.map((answer,index)=>{const question=finalQuiz[answer.qi];return question?<p key={question.id} style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{index+1}. {question.q} <strong style={{color:answer.correct?C.green:C.orange}}>{answer.correct?"Acertou":"Revisar"}</strong></p>:null;})}</div>
     </div></div>
     <div className="report-footer" style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:13,padding:14,textAlign:"center"}}><p style={{color:C.grayDk,fontSize:11,margin:"0 0 3px"}}>Diretriz Brasileira de Hipertensão 2025 · OMS 2020 · AASM · AHA/ASA 2026</p><p style={{color:C.grayDk,fontSize:11,margin:0}}>Relatório educativo de uma prévia do produto. Não calcula risco e não substitui avaliação profissional.</p></div>
-    <div className="no-print" style={{display:"flex",flexDirection:"column",gap:10}}><div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🔒 Este relatório pode conter apelido, idade aproximada e antecedentes de um familiar. Salve ou compartilhe somente com autorização.</div><Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>🖨️ IMPRIMIR OU SALVAR RELATÓRIO</Btn><Btn onClick={onReset} color={C.green} size="lg" style={{width:"100%"}}>↻ PRÓXIMO VISITANTE</Btn><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>CONHECER O JOGO COMPLETO</Btn></div>
+    <div className="no-print" style={{display:"flex",flexDirection:"column",gap:10}}><div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🔒 Este relatório pode conter apelido, idade aproximada e antecedentes de um familiar. Salve ou compartilhe somente com autorização.</div><Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>🖨️ IMPRIMIR OU SALVAR RELATÓRIO</Btn><Btn onClick={onReset} color={C.green} size="lg" style={{width:"100%"}}>↻ PRÓXIMO VISITANTE</Btn><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>CONHECER O JOGO COMPLETO</Btn><CreditsFooter/></div>
   </div>;
 }
 
@@ -3902,6 +3911,7 @@ function ReportScreen({playerName,m1Answers,m1Questions,m1Risk,quizAnswers,final
         <div style={{background:`${C.yellow}10`,border:`1px solid ${C.yellow}44`,borderRadius:12,padding:"10px 12px",color:C.grayLt,fontSize:12,lineHeight:1.55}}>🔒 O PDF pode conter seu apelido, hábitos e informações familiares. Salve apenas em um dispositivo seguro e compartilhe somente com sua autorização.</div>
         <Btn onClick={()=>window.print()} color={C.teal} size="lg" style={{width:"100%"}}>🖨️ IMPRIMIR OU SALVAR EM PDF</Btn>
         <Btn onClick={onBack} color={C.gray} outline size="lg" style={{width:"100%"}}>← VOLTAR PRO FINAL</Btn>
+        <CreditsFooter/>
       </div>
     </div>
   );
@@ -4023,6 +4033,7 @@ function VictoryScreen({totalScore,quizAnswers,playerName,finalQuiz,onRestart,on
             <Btn onClick={onShowReport} color={C.teal} size="lg" style={{width:"100%",color:"#000"}}>📊 VER MEU RELATÓRIO →</Btn>
             <Btn onClick={onRestart} color={C.red} outline size="lg" style={{width:"100%"}}>🔄 JOGAR NOVAMENTE</Btn>
             <p style={{color:C.grayDk,fontSize:11,textAlign:"center"}}>⚕️ Diretriz Brasileira de Hipertensão 2025 · OMS 2020 · AASM · AHA/ASA 2026</p>
+            <CreditsFooter/>
           </>
         )}
       </div>
