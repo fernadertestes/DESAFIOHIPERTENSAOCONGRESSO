@@ -5,6 +5,7 @@
 - `VERSAO_ATUAL.md` — escopo, interpretação e limitações;
 - `VERSAO_CONGRESSO.md` — estado técnico verificado;
 - `MODO_MOSTRA.md` — operação da Versão Congresso no evento;
+- `COMO_APLICAR_EM_AULA.md` — roteiro interativo de mediação para docentes;
 - `MATRIZ_EVIDENCIAS.md` — rastreabilidade científica;
 - `REFERENCIAS_CIENTIFICAS.md` — referências comentadas;
 - `VALIDACAO_METODOLOGICA.md` — trabalho necessário antes de alegar validade ou eficácia;

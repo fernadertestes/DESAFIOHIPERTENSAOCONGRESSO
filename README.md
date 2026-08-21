@@ -29,6 +29,8 @@ O percurso possui seis módulos e um quiz final:
 
 Para demonstrações públicas, a **Versão Congresso** funciona como um mini jogo completo: reutiliza a jogabilidade real de todos os módulos, reduzindo apenas a quantidade. São duas perguntas do Módulo 1, um familiar no Módulo 2, um caso no Módulo 3, quatro sintomas e uma escolha no Módulo 4, um caso com duas decisões no Módulo 5, uma ação escolhida entre três no Módulo 6 e duas perguntas no quiz final. Ao final, gera um relatório da experiência. Ela pode ser aberta pelo botão da capa ou diretamente com `?modo=congresso` no final da URL; o endereço antigo `?modo=mostra` continua compatível.
 
+O **Módulo Professor** é um novo modo de jogo que usa a versão curta do Congresso, mas introduz a aplicação em sala e apresenta uma orientação antes de cada módulo: objetivo, tempo, dinâmica, pergunta para a turma e cuidado ético. Ele pode ser aberto pela capa ou com `?modo=professor`; `?modo=aula` continua compatível. O módulo não substitui planejamento pedagógico, não solicita exposição de dados pessoais e não deve ser usado para atribuir nota.
+
 Ao concluir o percurso, o participante pode imprimir ou salvar o relatório de aprendizagem em PDF. A versão de impressão usa formato A4, preto e branco, folha timbrada do Desafio Hipertensão, identificação do participante, data de emissão e quebras de página preparadas para preservar a leitura dos cartões.
 
 ## Nota metodológica importante

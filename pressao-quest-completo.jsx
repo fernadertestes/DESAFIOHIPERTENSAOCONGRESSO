@@ -25,7 +25,7 @@ const C = {
   navy:"#60a5fa",white:"#f0f4ff",gray:"#a7b3c6",grayDk:"#8d9bb0",grayLt:"#cbd5e1",
 };
 
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.7.0";
 
 const MODULE_ART = {
   1: "/modules/m1-quiz-risco.webp",
@@ -943,7 +943,7 @@ function ThreeBackground({ moduleColor }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // MÓDULO 1 SCREENS
 // ═══════════════════════════════════════════════════════════════════════════════
-function M1Home({onStart,onShowcase,playerName,onDevUnlock}){
+function M1Home({onStart,onShowcase,onLesson,playerName,onDevUnlock}){
   const devEnabled=import.meta.env.DEV&&new URLSearchParams(window.location.search).has("dev");
   const [showDevModal,setShowDevModal]=useState(false);
   const [showSources,setShowSources]=useState(false);
@@ -982,6 +982,7 @@ function M1Home({onStart,onShowcase,playerName,onDevUnlock}){
           <Tag label="6 Módulos · Game educativo" color={C.red}/>
           <Btn onClick={onStart} color={C.red} size="lg" style={{width:"100%",maxWidth:320,boxShadow:`0 0 28px ${C.red}66`}}>INICIAR QUEST ▶</Btn>
           <Btn onClick={onShowcase} color={C.teal} outline size="lg" style={{width:"100%",maxWidth:320,background:`${C.bg}bb`,backdropFilter:"blur(10px)"}}>🎓 VERSÃO CONGRESSO · PRÉVIA DOS 6 MÓDULOS</Btn>
+          <Btn onClick={onLesson} color={C.amber} outline size="lg" style={{width:"100%",maxWidth:320,background:`${C.bg}bb`,backdropFilter:"blur(10px)"}}>🧑‍🏫 MÓDULO PROFESSOR · CONDUZIR EM SALA</Btn>
         </div>
 
         {showDevModal&&(
@@ -3093,6 +3094,29 @@ export function pickCongressActions(){
   return shuffle(M6_ACTIONS).slice(0,CONGRESS_PREVIEW_CONFIG.m6ActionOptions);
 }
 
+const LESSON_GUIDES=[
+  {module:1,color:C.red,icon:"❤️",title:"Radar de hábitos",time:"3–4 min",objective:"Abrir uma conversa sem transformar hábitos em julgamento.",setup:"Projete as duas perguntas e convide a turma a pensar primeiro em silêncio; depois, peça justificativas voluntárias.",prompt:"Qual escolha pequena poderia proteger a saúde no dia a dia?",care:"Não peça respostas pessoais em voz alta. Reforce que o radar não calcula risco nem dá diagnóstico."},
+  {module:2,color:C.amber,icon:"🧬",title:"Missão família",time:"4–5 min",objective:"Relacionar história familiar, cuidado e rede de apoio de forma respeitosa.",setup:"Use uma personagem fictícia ou deixe cada estudante escolher apenas o que se sentir confortável em registrar.",prompt:"Que informação ajudaria um adulto ou profissional a cuidar melhor dessa família?",care:"Não exponha doenças, idades ou medicamentos reais de familiares. Tudo pode ser deixado em branco."},
+  {module:3,color:C.green,icon:"🛡️",title:"Batalha da prevenção",time:"4–5 min",objective:"Transformar recomendações gerais em um plano possível para uma situação concreta.",setup:"Forme duplas: antes de clicar, elas escolhem uma carta de cada grupo e defendem a combinação.",prompt:"Qual plano é possível nesta situação e por quê?",care:"Valorize estratégias acessíveis e evite tratar condição financeira, corpo ou rotina como falha individual."},
+  {module:4,color:C.red,icon:"🔍",title:"Caçador de alertas",time:"3–4 min",objective:"Diferenciar sinais que merecem avaliação urgente de sintomas isolados.",setup:"Faça uma votação silenciosa com dedos, cartões ou enquete; só então revele a escolha no jogo.",prompt:"Que sinal nos faria parar e procurar um adulto ou atendimento?",care:"Reforce: o jogo não diagnostica. Diante de sinais fortes, a conduta é buscar ajuda — não improvisar remédios."},
+  {module:5,color:C.orange,icon:"⚠️",title:"Consequências reais",time:"4–5 min",objective:"Praticar decisões seguras em um caso simulado.",setup:"Leia o caso, dê 20 segundos de conversa em dupla e peça uma decisão antes de avançar cada etapa.",prompt:"Qual é a decisão mais segura agora? O que pode acontecer se esperarmos?",care:"Evite dramatizar ou culpabilizar. Situações de emergência devem seguir o fluxo local e o SAMU 192 onde houver cobertura."},
+  {module:6,color:C.teal,icon:"🏥",title:"Como ajudar minha família",time:"3–4 min",objective:"Encerrar com uma ação prática, possível e compartilhada com adultos.",setup:"Peça que cada dupla escolha uma ação que caberia na rotina da turma ou de uma família fictícia.",prompt:"Qual ação conseguimos tentar nesta semana sem assumir tarefas de profissionais?",care:"Adolescentes não devem alterar, organizar ou decidir medicamentos. Apoio e busca de orientação são ações seguras."},
+];
+
+function TeacherModuleTutorial({guide,onStart,onExit}){
+  return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",justifyContent:"center",gap:16,animation:"fadeUp .4s ease"}}>
+    <div style={{background:`linear-gradient(145deg,${guide.color}1f,${C.card})`,border:`1px solid ${guide.color}66`,borderRadius:24,padding:"22px 18px",position:"relative",overflow:"hidden"}}>
+      <div aria-hidden="true" style={{position:"absolute",right:-22,top:-26,fontSize:110,opacity:.1}}>{guide.icon}</div>
+      <div style={{position:"relative"}}><Tag label={`Antes do módulo ${guide.module}`} color={guide.color}/><div style={{display:"flex",alignItems:"center",gap:11,marginTop:14}}><div style={{fontSize:38}}>{guide.icon}</div><div><div style={{fontFamily:"Impact,sans-serif",fontSize:26,color:C.white,letterSpacing:1.5,lineHeight:1}}>{guide.title.toUpperCase()}</div><div style={{color:guide.color,fontSize:12,fontWeight:900,letterSpacing:1,marginTop:5}}>GUIA DO PROFESSOR · {guide.time}</div></div></div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.6,margin:"16px 0 0"}}>{guide.objective}</p></div>
+    </div>
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      {[["COMO CONDUZIR",guide.setup,"👥"],["PERGUNTA PARA A TURMA",guide.prompt,"💬"],["CUIDADO NA MEDIAÇÃO",guide.care,"🛟"]].map(([label,text,icon])=><div key={label} style={{background:C.surface,border:`1px solid ${C.borderHi}`,borderLeft:`3px solid ${guide.color}`,borderRadius:"0 14px 14px 0",padding:"13px 14px"}}><div style={{color:guide.color,fontSize:10,fontWeight:900,letterSpacing:1.2,marginBottom:5}}>{icon} {label}</div><p style={{color:C.grayLt,fontSize:13,lineHeight:1.55,margin:0}}>{text}</p></div>)}
+    </div>
+    <Btn onClick={onStart} color={guide.color} size="lg" style={{width:"100%"}}>ABRIR MÓDULO {guide.module} PARA A TURMA →</Btn>
+    <Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR À CAPA</Btn>
+  </div>;
+}
+
 function CongressFinalQuizIntro({questions,onStart}){
   return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",justifyContent:"center",gap:18,animation:"fadeUp .4s ease"}}>
     <div style={{textAlign:"center",background:`linear-gradient(150deg,${C.purple}1d,${C.card},${C.teal}12)`,border:`2px solid ${C.purple}55`,borderRadius:24,padding:"28px 18px"}}><div style={{fontSize:58,marginBottom:10}}>🎯</div><Tag label="Etapa final" color={C.purple}/><div style={{fontFamily:"Impact,sans-serif",fontSize:30,color:C.white,letterSpacing:2,marginTop:12}}>QUIZ FINAL</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"12px 0 0"}}>Duas perguntas sorteadas de módulos diferentes para fechar a experiência.</p></div>
@@ -3114,7 +3138,7 @@ function CongressModuleFrame({module,title,summary,color,children}){
   </div>;
 }
 
-function CongressReport({nickname,m1Answers,m1Questions,family,preventionChallenge,preventionResult,alertResult,m5Result,m6Result,finalQuiz,finalQuizAnswers,onReset,onExit}){
+function CongressReport({nickname,m1Answers,m1Questions,family,preventionChallenge,preventionResult,alertResult,m5Result,m6Result,finalQuiz,finalQuizAnswers,onReset,onExit,lessonMode=false}){
   const participant=nickname.trim()||"Participante";
   const reportDate=new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date());
   const m3Correct=preventionResult?.correctCount||0;
@@ -3133,9 +3157,9 @@ function CongressReport({nickname,m1Answers,m1Questions,family,preventionChallen
   ];
   return <div data-report style={{padding:"16px",display:"flex",flexDirection:"column",gap:18,animation:"fadeUp .4s ease"}}>
     <div className="print-page-footer" aria-hidden="true">MOSTRA DE PRODUTOS EDUCACIONAIS · VERSÃO {APP_VERSION}</div>
-    <div className="print-letterhead" aria-hidden="true"><div className="print-letterhead__mark"><svg viewBox="0 0 64 64"><path d="M32 52S10 39 10 22c0-8 5-13 13-13 5 0 8 3 9 7 2-4 5-7 10-7 8 0 13 5 13 13 0 17-23 30-23 30Z" strokeWidth="3"/><path d="M14 31h10l4-8 7 17 5-9h10" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div><div><div className="print-letterhead__brand">DESAFIO HIPERTENSÃO</div><div className="print-letterhead__subtitle">Conhecimento que protege · escolhas que transformam</div></div><div className="print-letterhead__meta">Prévia Congresso<br/>{reportDate} · versão {APP_VERSION}</div><div className="print-letterhead__title"><p>Relatório da experiência educacional</p><h1>{participant}</h1></div></div>
+    <div className="print-letterhead" aria-hidden="true"><div className="print-letterhead__mark"><svg viewBox="0 0 64 64"><path d="M32 52S10 39 10 22c0-8 5-13 13-13 5 0 8 3 9 7 2-4 5-7 10-7 8 0 13 5 13 13 0 17-23 30-23 30Z" strokeWidth="3"/><path d="M14 31h10l4-8 7 17 5-9h10" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div><div><div className="print-letterhead__brand">DESAFIO HIPERTENSÃO</div><div className="print-letterhead__subtitle">Conhecimento que protege · escolhas que transformam</div></div><div className="print-letterhead__meta">{lessonMode?"Módulo Professor":"Prévia Congresso"}<br/>{reportDate} · versão {APP_VERSION}</div><div className="print-letterhead__title"><p>Relatório da experiência educacional</p><h1>{participant}</h1></div></div>
     <div className="print-congress-summary"><strong>6 módulos + quiz final</strong><span>{decisionCorrect}/8 indicadores educativos protetores · não é nota ou diagnóstico</span></div>
-    <div className="screen-report-header" style={{textAlign:"center",background:`linear-gradient(150deg,${C.green}1a,${C.card},${C.teal}15)`,border:`2px solid ${C.green}55`,borderRadius:24,padding:"26px 18px"}}><div style={{fontSize:48}}>🎓</div><Tag label="Relatório congresso" color={C.green}/><div style={{fontFamily:"Impact,sans-serif",fontSize:30,letterSpacing:2,color:C.white,marginTop:12}}>MISSÃO CONCLUÍDA, {participant.toUpperCase()}</div><div style={{fontFamily:"Impact,sans-serif",fontSize:44,color:C.green,marginTop:12}}>6/6 MÓDULOS</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.55,margin:"8px 0 0"}}>Você experimentou as seis mecânicas e concluiu um quiz final com duas perguntas.</p></div>
+    <div className="screen-report-header" style={{textAlign:"center",background:`linear-gradient(150deg,${C.green}1a,${C.card},${C.teal}15)`,border:`2px solid ${C.green}55`,borderRadius:24,padding:"26px 18px"}}><div style={{fontSize:48}}>🎓</div><Tag label={lessonMode?"Percurso de aula":"Relatório congresso"} color={C.green}/><div style={{fontFamily:"Impact,sans-serif",fontSize:30,letterSpacing:2,color:C.white,marginTop:12}}>{lessonMode?`AULA CONCLUÍDA, ${participant.toUpperCase()}`:`MISSÃO CONCLUÍDA, ${participant.toUpperCase()}`}</div><div style={{fontFamily:"Impact,sans-serif",fontSize:44,color:C.green,marginTop:12}}>6/6 MÓDULOS</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.55,margin:"8px 0 0"}}>Você experimentou as seis mecânicas e concluiu um quiz final com duas perguntas.</p></div>
     <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:16}}><div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.teal,letterSpacing:2,marginBottom:12}}>MAPA DA EXPERIÊNCIA</div><div style={{display:"flex",flexDirection:"column",gap:10}}>{modules.map(item=><div key={item.n} className="report-card" style={{background:C.surface,border:`1px solid ${item.color}44`,padding:"10px 12px",borderRadius:12}}><div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:6}}><strong style={{color:C.white,fontSize:12}}>M{item.n} · {item.title}</strong><span style={{color:item.color,fontWeight:900,fontSize:11,textAlign:"right"}}>{item.label}</span></div><ProgressBar value={item.value} max={item.max} color={item.color} h={6}/></div>)}</div><p style={{color:C.gray,fontSize:10,lineHeight:1.5,margin:"12px 0 0"}}>As barras descrevem atividades diferentes. O mapeamento familiar registra participação, não desempenho nem risco clínico.</p></div>
     <div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:16}}><div style={{fontFamily:"Impact,sans-serif",fontSize:18,color:C.white,letterSpacing:2,marginBottom:12}}>O QUE ACONTECEU EM CADA MÓDULO</div><div style={{display:"flex",flexDirection:"column",gap:12}}>
       <div className="report-card" style={{borderLeft:`3px solid ${C.red}`,paddingLeft:12}}><strong style={{color:C.red}}>M1 · Duas perguntas de hábitos</strong>{m1Questions.map((question,index)=><p key={question.id} style={{color:C.grayLt,fontSize:11,lineHeight:1.5,margin:"6px 0 0"}}>{index+1}. {question.q} <strong style={{color:C.white}}>{m1Answers[index]?.t||"Sem resposta"}</strong></p>)}<p style={{color:C.gray,fontSize:10,lineHeight:1.5,margin:"7px 0 0"}}>Autorrelato educativo: não compõe nota, risco ou diagnóstico.</p></div>
@@ -3151,8 +3175,8 @@ function CongressReport({nickname,m1Answers,m1Questions,family,preventionChallen
   </div>;
 }
 
-function CongressMode({onExit}){
-  const [stage,setStage]=useState("intro");
+function CongressMode({onExit,lessonMode=false}){
+  const [stage,setStage]=useState(lessonMode?"lesson-intro":"intro");
   const [nickname,setNickname]=useState("");
   const [copied,setCopied]=useState(false);
   const [m1Answers,setM1Answers]=useState([]);
@@ -3170,23 +3194,26 @@ function CongressMode({onExit}){
   const [congressFinalQuiz,setCongressFinalQuiz]=useState(()=>pickCongressFinalQuiz());
   const [finalQuizAnswers,setFinalQuizAnswers]=useState([]);
   const congressUrl=typeof window!=="undefined"?`${window.location.origin}${window.location.pathname}?modo=congresso`:"";
-  const start=()=>{if(!nickname.trim())return;setM1Answers([]);setM1Questions([]);setMembers(initMembers());setFamily(null);setPreventionChallenge(shuffle(PREVENTION_CHALLENGES)[0]);setPreventionResult(null);setCongressSymptoms(pickCongressSymptoms());setAlertResult(null);setM5Result(null);setCongressActions(pickCongressActions());setM6Result(null);setCongressFinalQuiz(pickCongressFinalQuiz());setFinalQuizAnswers([]);setStage("m1");SFX.unlock();};
-  const reset=()=>{setNickname("");setCopied(false);setActiveMemberId(null);setStage("intro");setM1Answers([]);setM1Questions([]);setMembers(initMembers());setFamily(null);setPreventionResult(null);setCongressSymptoms(pickCongressSymptoms());setAlertResult(null);setM5Result(null);setCongressActions(pickCongressActions());setM6Result(null);setCongressFinalQuiz(pickCongressFinalQuiz());setFinalQuizAnswers([]);};
+  const goToModule=module=>setStage(lessonMode?`lesson-m${module}`:`m${module}`);
+  const start=()=>{if(!nickname.trim())return;setM1Answers([]);setM1Questions([]);setMembers(initMembers());setFamily(null);setPreventionChallenge(shuffle(PREVENTION_CHALLENGES)[0]);setPreventionResult(null);setCongressSymptoms(pickCongressSymptoms());setAlertResult(null);setM5Result(null);setCongressActions(pickCongressActions());setM6Result(null);setCongressFinalQuiz(pickCongressFinalQuiz());setFinalQuizAnswers([]);goToModule(1);SFX.unlock();};
+  const reset=()=>{setNickname("");setCopied(false);setActiveMemberId(null);setStage(lessonMode?"lesson-intro":"intro");setM1Answers([]);setM1Questions([]);setMembers(initMembers());setFamily(null);setPreventionResult(null);setCongressSymptoms(pickCongressSymptoms());setAlertResult(null);setM5Result(null);setCongressActions(pickCongressActions());setM6Result(null);setCongressFinalQuiz(pickCongressFinalQuiz());setFinalQuizAnswers([]);};
   const copyLink=async()=>{try{await navigator.clipboard.writeText(congressUrl);setCopied(true);setTimeout(()=>setCopied(false),1800);}catch{setCopied(false);}};
   const activeMember=members.find(member=>member.id===activeMemberId);
   const activeMemberDef=FAM_DEFS.find(definition=>definition.id===activeMemberId);
 
-  if(stage==="intro")return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",gap:18,justifyContent:"center",animation:"fadeUp .4s ease"}}><div style={{position:"relative",overflow:"hidden",background:`linear-gradient(155deg,${C.teal}1f,${C.card} 45%,${C.red}16)`,border:`1px solid ${C.teal}66`,borderRadius:26,padding:"26px 20px",boxShadow:`0 0 70px ${C.teal}18`}}><div aria-hidden="true" style={{position:"absolute",right:-45,top:-45,width:160,height:160,borderRadius:"50%",border:`28px solid ${C.teal}12`}}/><div style={{position:"relative"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:18}}><Tag label="Mostra de Produtos · 2026" color={C.teal}/><span style={{color:C.grayLt,fontSize:12,fontWeight:800}}>≈ 8–12 MIN</span></div><div style={{fontFamily:"Impact,sans-serif",fontSize:38,lineHeight:.95,letterSpacing:2,color:C.white}}>MINI JOGO COMPLETO</div><div style={{fontFamily:"Impact,sans-serif",fontSize:22,lineHeight:1.1,letterSpacing:3,color:C.teal,marginTop:7}}>DESAFIO HIPERTENSÃO</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 16px"}}>As mesmas seis jogabilidades do aplicativo completo, em uma campanha curta para experimentar na mostra.</p><label htmlFor="congress-nickname" style={{display:"block",color:C.white,fontSize:12,fontWeight:900,letterSpacing:1,marginBottom:7}}>SUA CREDENCIAL: APELIDO</label><input id="congress-nickname" value={nickname} onChange={event=>setNickname(event.target.value.slice(0,24))} onKeyDown={event=>{if(event.key==="Enter")start();}} autoComplete="off" maxLength={24} placeholder="Como quer aparecer no relatório?" style={{width:"100%",boxSizing:"border-box",background:C.bg,border:`2px solid ${nickname.trim()?C.teal:C.borderHi}`,borderRadius:12,padding:"11px 13px",color:C.white,fontSize:15,marginBottom:6}}/><p style={{color:C.gray,fontSize:11,lineHeight:1.45,margin:"0 0 16px"}}>Use apenas um apelido. O Módulo 2 pedirá informações de um familiar; você pode marcar somente o que souber e quiser informar.</p><div aria-label="Rota com seis módulos" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,marginBottom:12}}>{[[C.red,"❤️","2 perguntas"],[C.amber,"🧬","1 familiar"],[C.green,"🛡️","1 caso"],[C.red,"🔍","4 sintomas"],[C.orange,"⚠️","1 caso"],[C.teal,"🏥","1 ação"]].map(([color,icon,label],index)=><div key={`${index}-${label}`} style={{textAlign:"center"}}><div style={{height:5,borderRadius:99,background:color,boxShadow:`0 0 10px ${color}77`,marginBottom:7}}/><span aria-hidden="true" style={{fontSize:18}}>{icon}</span><span className="sr-only">{`Módulo ${index+1}: ${label}`}</span></div>)}</div><div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,color:C.purple,fontWeight:900,fontSize:12,marginBottom:18}}>🎯 + QUIZ FINAL · 2 PERGUNTAS</div><Btn onClick={start} disabled={!nickname.trim()} color={C.teal} size="lg" style={{width:"100%"}}>COMEÇAR O MINI JOGO ⚡</Btn></div></div><div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:14,alignItems:"center",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:15}}><div><div style={{color:C.white,fontWeight:900,fontSize:13,marginBottom:5}}>ABRA NO SEU CELULAR</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.5,margin:0}}>Aponte a câmera para abrir a mesma experiência.</p><button onClick={copyLink} style={{marginTop:8,background:"transparent",border:0,color:C.teal,textDecoration:"underline",fontWeight:800,fontSize:12,padding:0,minHeight:30}}>{copied?"✓ LINK COPIADO":"COPIAR LINK"}</button></div><div style={{background:"#fff",padding:7,borderRadius:10,lineHeight:0}} aria-label="QR Code para abrir a versão congresso"><QRCodeSVG value={congressUrl} size={92} bgColor="#ffffff" fgColor="#07090f" level="M" title="Abrir versão congresso"/></div></div><Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR AO JOGO COMPLETO</Btn></div>;
-  if(stage==="m1")return <CongressModuleFrame module={1} title="PRESSÃO QUEST" summary="2 perguntas do radar original" color={C.red}><M1Quiz key="congress-m1" questionCount={CONGRESS_PREVIEW_CONFIG.m1Questions} onFinish={(answers,questions)=>{setM1Answers(answers);setM1Questions(questions);setStage("m2sel");}}/></CongressModuleFrame>;
-  if(stage==="m2sel")return <CongressModuleFrame module={2} title="MISSÃO FAMÍLIA" summary="Mapeie 1 familiar" color={C.amber}><M2Selector members={members} onEdit={id=>{setActiveMemberId(id);setStage("m2detail");}} onFinish={()=>setStage("m3")}/></CongressModuleFrame>;
-  if(stage==="m2detail"&&activeMember&&activeMemberDef)return <CongressModuleFrame module={2} title="MISSÃO FAMÍLIA" summary="Mapeie 1 familiar" color={C.amber}><M2Detail member={activeMember} memberDef={activeMemberDef} onBack={()=>setStage("m2sel")} saveLabel="💾 SALVAR FAMILIAR E AVANÇAR" onSave={updated=>{setMembers(previous=>previous.map(member=>member.id===updated.id?updated:member));setFamily(updated);setStage("m3");}}/></CongressModuleFrame>;
-  if(stage==="m3")return <CongressModuleFrame module={3} title="BATALHA DA PREVENÇÃO" summary="Monte o plano de 1 caso" color={C.green}><M3Challenge key={preventionChallenge.id} challenge={preventionChallenge} challengeIndex={0} totalChallenges={1} unlockedAllies={[]} combo={0} onSubmit={result=>{setPreventionResult(result);setStage("m4");}}/></CongressModuleFrame>;
-  if(stage==="m4")return <CongressModuleFrame module={4} title="CAÇADOR DE ALERTAS" summary="1 sinal correto entre 4 sintomas" color={C.red}><M4Game symptomPool={congressSymptoms} selectionLimit={CONGRESS_PREVIEW_CONFIG.correctSymptoms} onFinish={(score,perfect,result)=>{setAlertResult({...result,score,perfect});setStage("m5");}}/></CongressModuleFrame>;
-  if(stage==="m5")return <CongressModuleFrame module={5} title="CONSEQUÊNCIAS REAIS" summary="1 caso com 2 decisões" color={C.orange}><M5Game scenarioCount={CONGRESS_PREVIEW_CONFIG.m5Scenarios} onFinish={(score,totalDamage,decisions)=>{setM5Result({score,totalDamage,decisions});setStage("m6");}}/></CongressModuleFrame>;
+  if(stage==="intro"||stage==="lesson-intro")return <div style={{minHeight:"100vh",padding:"22px 16px 32px",display:"flex",flexDirection:"column",gap:18,justifyContent:"center",animation:"fadeUp .4s ease"}}><div style={{position:"relative",overflow:"hidden",background:`linear-gradient(155deg,${C.amber}20,${C.card} 45%,${C.teal}16)`,border:`1px solid ${C.amber}66`,borderRadius:26,padding:"26px 20px",boxShadow:`0 0 70px ${C.amber}18`}}><div aria-hidden="true" style={{position:"absolute",right:-45,top:-45,width:160,height:160,borderRadius:"50%",border:`28px solid ${C.amber}12`}}/><div style={{position:"relative"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:18}}><Tag label={lessonMode?"Novo modo · professor":"Mostra de Produtos · 2026"} color={lessonMode?C.amber:C.teal}/><span style={{color:C.grayLt,fontSize:12,fontWeight:800}}>{lessonMode?"≈ 25–35 MIN":"≈ 8–12 MIN"}</span></div><div style={{fontFamily:"Impact,sans-serif",fontSize:38,lineHeight:.95,letterSpacing:2,color:C.white}}>{lessonMode?"MÓDULO PROFESSOR":"MINI JOGO COMPLETO"}</div><div style={{fontFamily:"Impact,sans-serif",fontSize:22,lineHeight:1.1,letterSpacing:3,color:lessonMode?C.amber:C.teal,marginTop:7}}>{lessonMode?"CONDUZA A TURMA ETAPA POR ETAPA":"DESAFIO HIPERTENSÃO"}</div><p style={{color:C.grayLt,fontSize:14,lineHeight:1.65,margin:"18px 0 16px"}}>{lessonMode?"Primeiro, prepare a conversa. Em seguida, antes de cada módulo, receba uma orientação para conduzir a turma e abra a mesma experiência curta da Versão Congresso.":"As mesmas seis jogabilidades do aplicativo completo, em uma campanha curta para experimentar na mostra."}</p><label htmlFor="congress-nickname" style={{display:"block",color:C.white,fontSize:12,fontWeight:900,letterSpacing:1,marginBottom:7}}>{lessonMode?"IDENTIFICAÇÃO DA TURMA OU APELIDO":"SUA CREDENCIAL: APELIDO"}</label><input id="congress-nickname" value={nickname} onChange={event=>setNickname(event.target.value.slice(0,24))} onKeyDown={event=>{if(event.key==="Enter")start();}} autoComplete="off" maxLength={24} placeholder={lessonMode?"Ex.: 9º ano A":"Como quer aparecer no relatório?"} style={{width:"100%",boxSizing:"border-box",background:C.bg,border:`2px solid ${nickname.trim()?(lessonMode?C.amber:C.teal):C.borderHi}`,borderRadius:12,padding:"11px 13px",color:C.white,fontSize:15,marginBottom:6}}/><p style={{color:C.gray,fontSize:11,lineHeight:1.45,margin:"0 0 16px"}}>{lessonMode?"Você verá: intenção pedagógica, dinâmica, pergunta para a turma e cuidado ético. No Módulo 2, use personagem fictícia ou registros voluntários.":"Use apenas um apelido. O Módulo 2 pedirá informações de um familiar; você pode marcar somente o que souber e quiser informar."}</p><div aria-label="Rota com seis módulos" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,marginBottom:12}}>{[[C.red,"❤️","2 perguntas"],[C.amber,"🧬","1 familiar"],[C.green,"🛡️","1 caso"],[C.red,"🔍","4 sintomas"],[C.orange,"⚠️","1 caso"],[C.teal,"🏥","1 ação"]].map(([color,icon,label],index)=><div key={`${index}-${label}`} style={{textAlign:"center"}}><div style={{height:5,borderRadius:99,background:color,boxShadow:`0 0 10px ${color}77`,marginBottom:7}}/><span aria-hidden="true" style={{fontSize:18}}>{icon}</span><span className="sr-only">{`Módulo ${index+1}: ${label}`}</span></div>)}</div><div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,color:C.purple,fontWeight:900,fontSize:12,marginBottom:18}}>🎯 + QUIZ FINAL · 2 PERGUNTAS</div><Btn onClick={start} disabled={!nickname.trim()} color={lessonMode?C.amber:C.teal} size="lg" style={{width:"100%"}}>{lessonMode?"INICIAR ORIENTAÇÃO DO MÓDULO 1 →":"COMEÇAR O MINI JOGO ⚡"}</Btn></div></div>{lessonMode?<div style={{background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:15}}><div style={{color:C.amber,fontWeight:900,fontSize:13,marginBottom:5}}>ROTEIRO DO MÓDULO PROFESSOR</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.5,margin:0}}>Introduza a proposta, leia a orientação da etapa, converse com a turma e só então abra o módulo para a decisão coletiva.</p></div>:<div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:14,alignItems:"center",background:C.card,border:`1px solid ${C.borderHi}`,borderRadius:18,padding:15}}><div><div style={{color:C.white,fontWeight:900,fontSize:13,marginBottom:5}}>ABRA NO SEU CELULAR</div><p style={{color:C.grayLt,fontSize:12,lineHeight:1.5,margin:0}}>Aponte a câmera para abrir a mesma experiência.</p><button onClick={copyLink} style={{marginTop:8,background:"transparent",border:0,color:C.teal,textDecoration:"underline",fontWeight:800,fontSize:12,padding:0,minHeight:30}}>{copied?"✓ LINK COPIADO":"COPIAR LINK"}</button></div><div style={{background:"#fff",padding:7,borderRadius:10,lineHeight:0}} aria-label="QR Code para abrir a versão congresso"><QRCodeSVG value={congressUrl} size={92} bgColor="#ffffff" fgColor="#07090f" level="M" title="Abrir versão congresso"/></div></div>}<Btn onClick={onExit} color={C.gray} outline style={{width:"100%"}}>← VOLTAR AO JOGO COMPLETO</Btn></div>;
+  const lessonGuide=LESSON_GUIDES.find(guide=>stage===`lesson-m${guide.module}`);
+  if(lessonGuide)return <TeacherModuleTutorial guide={lessonGuide} onStart={()=>setStage(`m${lessonGuide.module}`)} onExit={onExit}/>;
+  if(stage==="m1")return <CongressModuleFrame module={1} title="PRESSÃO QUEST" summary="2 perguntas do radar original" color={C.red}><M1Quiz key="congress-m1" questionCount={CONGRESS_PREVIEW_CONFIG.m1Questions} onFinish={(answers,questions)=>{setM1Answers(answers);setM1Questions(questions);goToModule(2);}}/></CongressModuleFrame>;
+  if(stage==="m2sel")return <CongressModuleFrame module={2} title="MISSÃO FAMÍLIA" summary="Mapeie 1 familiar" color={C.amber}><M2Selector members={members} onEdit={id=>{setActiveMemberId(id);setStage("m2detail");}} onFinish={()=>goToModule(3)}/></CongressModuleFrame>;
+  if(stage==="m2detail"&&activeMember&&activeMemberDef)return <CongressModuleFrame module={2} title="MISSÃO FAMÍLIA" summary="Mapeie 1 familiar" color={C.amber}><M2Detail member={activeMember} memberDef={activeMemberDef} onBack={()=>setStage("m2sel")} saveLabel="💾 SALVAR FAMILIAR E AVANÇAR" onSave={updated=>{setMembers(previous=>previous.map(member=>member.id===updated.id?updated:member));setFamily(updated);goToModule(3);}}/></CongressModuleFrame>;
+  if(stage==="m3")return <CongressModuleFrame module={3} title="BATALHA DA PREVENÇÃO" summary="Monte o plano de 1 caso" color={C.green}><M3Challenge key={preventionChallenge.id} challenge={preventionChallenge} challengeIndex={0} totalChallenges={1} unlockedAllies={[]} combo={0} onSubmit={result=>{setPreventionResult(result);goToModule(4);}}/></CongressModuleFrame>;
+  if(stage==="m4")return <CongressModuleFrame module={4} title="CAÇADOR DE ALERTAS" summary="1 sinal correto entre 4 sintomas" color={C.red}><M4Game symptomPool={congressSymptoms} selectionLimit={CONGRESS_PREVIEW_CONFIG.correctSymptoms} onFinish={(score,perfect,result)=>{setAlertResult({...result,score,perfect});goToModule(5);}}/></CongressModuleFrame>;
+  if(stage==="m5")return <CongressModuleFrame module={5} title="CONSEQUÊNCIAS REAIS" summary="1 caso com 2 decisões" color={C.orange}><M5Game scenarioCount={CONGRESS_PREVIEW_CONFIG.m5Scenarios} onFinish={(score,totalDamage,decisions)=>{setM5Result({score,totalDamage,decisions});goToModule(6);}}/></CongressModuleFrame>;
   if(stage==="m6")return <CongressModuleFrame module={6} title="COMO AJUDAR MINHA FAMÍLIA" summary="Escolha 1 ação possível entre 3" color={C.teal}><M6Game actions={congressActions} maxCommitments={CONGRESS_PREVIEW_CONFIG.m6Commitments} finishLabel="🎯 FECHAR PLANO E IR AO QUIZ →" onFinish={(score,commitments)=>{setM6Result({score,commitments});setStage("quizintro");}}/></CongressModuleFrame>;
   if(stage==="quizintro")return <CongressFinalQuizIntro questions={congressFinalQuiz} onStart={()=>setStage("quiz")}/>;
   if(stage==="quiz")return <QuizFinal finalQuiz={congressFinalQuiz} onFinish={(score,answers)=>{setFinalQuizAnswers(answers);setStage("report");}}/>;
-  return <CongressReport nickname={nickname} m1Answers={m1Answers} m1Questions={m1Questions} family={family} preventionChallenge={preventionChallenge} preventionResult={preventionResult} alertResult={alertResult} m5Result={m5Result} m6Result={m6Result} finalQuiz={congressFinalQuiz} finalQuizAnswers={finalQuizAnswers} onReset={reset} onExit={onExit}/>;
+  return <CongressReport nickname={nickname} m1Answers={m1Answers} m1Questions={m1Questions} family={family} preventionChallenge={preventionChallenge} preventionResult={preventionResult} alertResult={alertResult} m5Result={m5Result} m6Result={m6Result} finalQuiz={congressFinalQuiz} finalQuizAnswers={finalQuizAnswers} onReset={reset} onExit={onExit} lessonMode={lessonMode}/>;
 }
 
 function QuizFinalIntro({finalQuiz,onStart}){
@@ -4007,7 +4034,7 @@ function VictoryScreen({totalScore,quizAnswers,playerName,finalQuiz,onRestart,on
 // ORQUESTRADOR PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function PressaoQuest(){
-  const [screen,setScreen]=useState(()=>["mostra","congresso"].includes(new URLSearchParams(window.location.search).get("modo"))?"congress":"home");
+  const [screen,setScreen]=useState(()=>{const mode=new URLSearchParams(window.location.search).get("modo");return ["mostra","congresso"].includes(mode)?"congress":["aula","professor"].includes(mode)?"lesson":"home";});
   const [soundOn,setSoundOn]=useState(true);
   const [playerName,setPlayerName]=useState("Jogador");
   const [m1Answers,setM1Answers]=useState([]);
@@ -4042,10 +4069,10 @@ export default function PressaoQuest(){
     m4intro:"4",m4game:"4",m4result:"4",
     m5intro:"5",m5game:"5",m5result:"5",
     m6intro:"6",m6game:"6",
-    quizfinalintro:"quiz",quizfinal:"quiz",victory:"quiz",report:"report",congress:"congress",
+    quizfinalintro:"quiz",quizfinal:"quiz",victory:"quiz",report:"report",congress:"congress",lesson:"lesson",
   };
   const currentModule=screenModules[screen]||"1";
-  const currentModuleLabel={1:"Hábitos",2:"Família",3:"Prevenção",4:"Alertas",5:"Consequências",6:"Ação familiar",quiz:"Quiz final",report:"Relatório",congress:"Versão Congresso"}[currentModule]||"Pressão Quest";
+  const currentModuleLabel={1:"Hábitos",2:"Família",3:"Prevenção",4:"Alertas",5:"Consequências",6:"Ação familiar",quiz:"Quiz final",report:"Relatório",congress:"Versão Congresso",lesson:"Módulo Professor"}[currentModule]||"Pressão Quest";
 
   useEffect(()=>{SFX.setMuted(!soundOn);},[soundOn]);
   useEffect(()=>{
@@ -4091,6 +4118,12 @@ export default function PressaoQuest(){
   const closeShowcase=()=>{
     const url=new URL(window.location.href);url.searchParams.delete("modo");window.history.replaceState({},"",url);setScreen("home");
   };
+  const openLesson=()=>{
+    const url=new URL(window.location.href);url.searchParams.set("modo","professor");window.history.replaceState({},"",url);setScreen("lesson");
+  };
+  const closeLesson=()=>{
+    const url=new URL(window.location.href);url.searchParams.delete("modo");window.history.replaceState({},"",url);setScreen("home");
+  };
 
   const restart=()=>{
     setScreen("home");setPlayerName("Jogador");setM1Answers([]);setM1Score(0);setM1Risk(0);
@@ -4126,23 +4159,24 @@ export default function PressaoQuest(){
   const currentMemberDef=FAM_DEFS.find(f=>f.id===detailQueue[detailIdx]);
   const currentMember=members.find(m=>m.id===detailQueue[detailIdx]);
 
-  const moduleColorMap={"1":C.red,"2":C.amber,"3":C.green,"4":C.red,"5":C.orange,"6":C.teal,quiz:C.purple,report:C.teal,congress:C.teal};
+  const moduleColorMap={"1":C.red,"2":C.amber,"3":C.green,"4":C.red,"5":C.orange,"6":C.teal,quiz:C.purple,report:C.teal,congress:C.teal,lesson:C.amber};
   const moduleColor=moduleColorMap[currentModule]||C.red;
 
   return(
     <div style={{minHeight:"100vh",background:C.bg,color:C.white,fontFamily:"'Segoe UI',system-ui,sans-serif",position:"relative"}}>
       <style>{GLOBAL_CSS}</style>
       <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
-      {screen!=="congress"&&<ThreeBackground moduleColor={moduleColor}/>}
+      {screen!=="congress"&&screen!=="lesson"&&<ThreeBackground moduleColor={moduleColor}/>}
       <ModuleAura color={moduleColor} label={currentModuleLabel}/>
       <SoundToggle on={soundOn} onToggle={()=>setSoundOn(v=>!v)}/>
 
-      {screen!=="home"&&screen!=="devpanel"&&screen!=="congress"&&<TopBar module={currentModule} score={totalScore} onBack={screen==="report"?()=>setScreen("victory"):undefined}/>}
+      {screen!=="home"&&screen!=="devpanel"&&screen!=="congress"&&screen!=="lesson"&&<TopBar module={currentModule} score={totalScore} onBack={screen==="report"?()=>setScreen("victory"):undefined}/>}
 
       <main id="main-content" ref={mainRef} tabIndex={-1} key={screen} aria-labelledby="screen-title" style={{width:"100%",maxWidth:560,margin:"0 auto",position:"relative",zIndex:1,animation:"screenEnter .32s cubic-bezier(.4,0,.2,1)"}}>
         <h1 id="screen-title" className="sr-only">Desafio Hipertensão — {currentModuleLabel}</h1>
-        {screen==="home"&&<M1Home onStart={()=>setScreen("name")} onShowcase={openShowcase} playerName={playerName} onDevUnlock={()=>setScreen("devpanel")}/>}
+        {screen==="home"&&<M1Home onStart={()=>setScreen("name")} onShowcase={openShowcase} onLesson={openLesson} playerName={playerName} onDevUnlock={()=>setScreen("devpanel")}/>}
         {screen==="congress"&&<CongressMode onExit={closeShowcase}/>}
+        {screen==="lesson"&&<CongressMode onExit={closeLesson} lessonMode/>}
         {screen==="devpanel"&&<DevPanel onJump={devJumpTo} onClose={()=>setScreen("home")}/>}
         {screen==="name"&&<M1Name onConfirm={n=>{setPlayerName(n);setScreen("m1quiz");}}/>}
         {screen==="m1quiz"&&<M1Quiz onFinish={finishM1}/>}
